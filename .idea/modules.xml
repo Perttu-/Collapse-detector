@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/FallDetection.iml" filepath="$PROJECT_DIR$/FallDetection.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Collapse-detector.iml" filepath="$PROJECT_DIR$/Collapse-detector.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/collapse_detector.iml" filepath="$PROJECT_DIR$/collapse_detector.iml" />
     </modules>

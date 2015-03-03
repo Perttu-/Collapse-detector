@@ -88,6 +88,7 @@ public class Homescreen extends FragmentActivity implements LocationListener {
     }
 
 
+
     private class GeocoderHandler extends Handler {
         @Override
         public void handleMessage(Message message) {

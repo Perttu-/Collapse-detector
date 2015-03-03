@@ -12,8 +12,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.*;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -22,6 +24,7 @@ import com.aware.Aware_Preferences;
 import com.aware.ESM;
 import com.aware.providers.ESM_Provider;
 import com.aware.utils.Aware_Plugin;
+import com.aware.plugin.collapse_detector.Homescreen;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,6 +41,8 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
 
     private  final ESMStatusListener esm_statuses = new ESMStatusListener();
     public static Intent intent2;
+
+
 
 
     //server details
@@ -83,7 +88,7 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
         double y = event.values[1];
         double z = event.values[2];
 
-        double vector_sum = Math.sqrt(x*x + y*y + z*z );
+        double vector_sum = Math.sqrt(x*x + y*y + z*z);
 
         //the acceleration is around 0.3 as its lowest when in free fall. This may depend on the phone used.
         if (vector_sum < 0.3){
@@ -94,8 +99,7 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
             // send data to server
             new Thread(new Client()).start();
 
-            // add code to send data to server
-            // Timestamp and GPS coordinates
+
         }
     }
 
@@ -164,13 +168,25 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
                 //current timestamp
                 Long timestamp = System.currentTimeMillis();
 
+                //get longitude and latitude
+                LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+                Criteria criteria = new Criteria();
+                String bestProvider = locationManager.getBestProvider(criteria, true);
+                android.location.Location location = locationManager.getLastKnownLocation(bestProvider);
+                double latitude = location.getLatitude();
+                double longitude = location.getLongitude();
+
+                //get device id
+                final TelephonyManager tm = (TelephonyManager) getBaseContext().getSystemService(Context.TELEPHONY_SERVICE);
+                String device_id = tm.getDeviceId();
+
                 // Here we convert Java Object to JSON
 
                 JSONObject jsonObj = new JSONObject();
                 jsonObj.put("timestamp", timestamp);
-
-
-
+                jsonObj.put("latitude", latitude);
+                jsonObj.put("longitude", longitude);
+                jsonObj.put("device id", device_id);
 
                 // Retrieve the ServerName
                 InetAddress serverAddr = InetAddress.getByName(UDP_SERVER_IP);
@@ -188,6 +204,7 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
                 socket.send(packet);
                 Log.d("UDP", "C: Sent.");
                 Log.d("UDP", "C: Done.");
+
 
                 socket.receive(packet);
                 Log.d("UDP", "C: Received: '" + new String(packet.getData()) + "'");

@@ -15,6 +15,7 @@ import android.util.Log;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+
 public class LocationAddress {
 
     private static final String TAG = "LocationAddress";
