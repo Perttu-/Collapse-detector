@@ -53,7 +53,9 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
     @Override
     public void onCreate() {
         super.onCreate();
-
+        intent2 = new Intent(getApplicationContext(),MainActivity.class);
+        intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent2);
         Toast.makeText(getApplicationContext(),"Monitoring Started", Toast.LENGTH_SHORT).show();
 
         TAG = "collapse_detector";
