@@ -1,15 +1,12 @@
 package com.aware.plugin.collapse_detector;
 
-import android.app.Activity;
 
-
-import android.provider.SyncStateContract;
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -24,7 +21,14 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 
 public class MainActivity extends FragmentActivity {
@@ -36,9 +40,13 @@ public class MainActivity extends FragmentActivity {
     private CharSequence mDrawerTitle;
     private CharSequence mTitle;
 
+    Toolbar toolbar;
+
+    public static Intent intent2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -51,7 +59,7 @@ public class MainActivity extends FragmentActivity {
         mDrawerList.setAdapter(new ArrayAdapter<String>(this,
                 R.layout.drawer_listview_item, array));
 
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(mTitle);
 
 
@@ -64,26 +72,23 @@ public class MainActivity extends FragmentActivity {
 
             public void onDrawerClosed(View view){
                 super.onDrawerClosed(view);
-                //toolbar.setTitle(mTitle);
 
                 //invalidateOptionsMenu();
             }
 
             public void onDrawerOpened(View drawerView){
                 super.onDrawerOpened(drawerView);
-                //setTitle(toolbar, mTitle);
 
                 //invalidateOptionsMenu();
             }
         };
 
         mDrawerLayout.setDrawerListener(mDrawerToggle);
+
+
     }
 
-    public void setTitle(Toolbar toolbar, CharSequence title) {
-        mTitle = title;
-        toolbar.setTitle(mTitle);
-    }
+
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
             @Override
             public void onItemClick(AdapterView parent, View view, int position, long id) {
@@ -93,11 +98,8 @@ public class MainActivity extends FragmentActivity {
         }
 
     private void selectItem(int position) {
-        // Create a new fragment and specify the planet to show based on position
-        //Fragment fragment = new HomeFragment();
 
         mDrawerList.setItemChecked(position, true);
-        setTitle(mTitle);
         mDrawerLayout.closeDrawer(mDrawerList);
     }
     @Override
@@ -113,8 +115,6 @@ public class MainActivity extends FragmentActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         int id = item.getItemId();
-        Toast.makeText(getApplicationContext(), "Something", Toast.LENGTH_SHORT).show();
-
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
@@ -128,7 +128,11 @@ public class MainActivity extends FragmentActivity {
         Fragment fragment = null;
         switch (position) {
             case 0:
-                fragment = new MapFragment();
+                //fragment = new GMapFragment();
+                //Needs to be fixed. Now this opens a new activity although it should open a fragment
+                intent2 = new Intent(getApplicationContext(), Homescreen.class);
+                intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent2);
                 break;
 
             case 1:
@@ -150,17 +154,19 @@ public class MainActivity extends FragmentActivity {
         if (fragment != null) {
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//            fragmentManager.beginTransaction()
-//                    .replace(R.id.frame_container, fragment).commit();
             fragmentTransaction.replace(R.id.content_frame, fragment).commit();
 
             // update selected item and title, then close the drawer
             mDrawerList.setItemChecked(position, true);
             mDrawerList.setSelection(position);
+            toolbar.setTitle(array[position]);
             mDrawerLayout.closeDrawer(mDrawerList);
-        } else {
-            Toast.makeText(getApplicationContext(), "Fragment failed", Toast.LENGTH_SHORT).show();
 
+
+        }
+
+        if (fragment == null & position !=0) {
+            Toast.makeText(getApplicationContext(), "Fragment failed", Toast.LENGTH_SHORT).show();
         }
     }
 

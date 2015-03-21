@@ -43,8 +43,6 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
     public static Intent intent2;
 
 
-
-
     //server details
     int UDP_SERVER_PORT = 80;
     String UDP_SERVER_IP = "85.23.168.159";
@@ -53,9 +51,10 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
     @Override
     public void onCreate() {
         super.onCreate();
-        intent2 = new Intent(getApplicationContext(),MainActivity.class);
-        intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent2);
+        //uncomment to test activity without fall event
+//        intent2 = new Intent(getApplicationContext(),MainActivity.class);
+//        intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        startActivity(intent2);
         Toast.makeText(getApplicationContext(),"Monitoring Started", Toast.LENGTH_SHORT).show();
 
         TAG = "collapse_detector";
@@ -94,7 +93,7 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
 
         //the acceleration is around 0.3 as its lowest when in free fall. This may depend on the phone used.
         if (vector_sum < 0.3){
-            Toast.makeText(getApplicationContext(),"I fell down!", Toast.LENGTH_LONG).show();
+            //Toast.makeText(getApplicationContext(),"I fell down!", Toast.LENGTH_LONG).show();
             Log.d(TAG, "Vector sum: " + vector_sum);
             notifyUser();
 
@@ -143,15 +142,15 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
                     if (ans.equalsIgnoreCase("Yes")) {
                         Log.d(TAG, "answer is yes, homescreen shows up");
                         //shows map UI
-                        intent2 = new Intent(getApplicationContext(), Homescreen.class);
+//                        intent2 = new Intent(getApplicationContext(), Homescreen.class);
+//                        intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                        startActivity(intent2);
+
+                        //shows ui for map and other information
+                        intent2 = new Intent(getApplicationContext(),MainActivity.class);
                         intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent2);
 
-                        //trying google maps
-//                        Intent intent3 = new Intent(android.content.Intent.ACTION_VIEW,
-//                                Uri.parse("http://maps.google.com/maps?daddr=60.1708, 24.9375"));
-//
-//                        startActivity(intent3);
 
                     }
                     if (esm_answers != null && !esm_answers.isClosed()) esm_answers.close();
@@ -183,7 +182,6 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
                 String device_id = tm.getDeviceId();
 
                 // Here we convert Java Object to JSON
-
                 JSONObject jsonObj = new JSONObject();
                 jsonObj.put("timestamp", timestamp);
                 jsonObj.put("latitude", latitude);

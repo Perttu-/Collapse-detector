@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -55,35 +56,24 @@ public class Homescreen extends FragmentActivity implements LocationListener {
         if (marker != null)
             marker.remove();
 
-        //TextView locationTv = (TextView) findViewById(R.id.latlongLocation);
         double latitude = location.getLatitude();
         double longitude = location.getLongitude();
         Log.d(TAG, "Latitude: " + latitude + ", Longitude: " + longitude);
         LatLng latLng = new LatLng(latitude, longitude);
         marker = googleMap.addMarker(new MarkerOptions().position(latLng));
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        googleMap.animateCamera(CameraUpdateFactory.zoomTo(5));
+        googleMap.animateCamera(CameraUpdateFactory.zoomTo(10));
 
         // to get the address
         LocationAddress locationAddress = new LocationAddress();
         locationAddress.getAddressFromLocation(latitude, longitude,
         getApplicationContext(), new GeocoderHandler());
 
-//        double newLat = 13.7563;
-//        double newLon = 100.5018;
-//        LatLng newLatLng = new LatLng(newLat, newLon);
-//        googleMap.addMarker(new MarkerOptions().position(newLatLng));
-//        googleMap.moveCamera(CameraUpdateFactory.newLatLng(newLatLng));
-//        googleMap.animateCamera(CameraUpdateFactory.zoomTo(2));
-
-        //locationTv.setText("Latitude: " + new DecimalFormat("##.###").format(latitude) + ", Longitude: " + new DecimalFormat("##.###").format(longitude));
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.menu_homescreen, menu);
         return true;
     }
 
@@ -110,16 +100,7 @@ public class Homescreen extends FragmentActivity implements LocationListener {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-//        int id = item.getItemId();
-//
-//        //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_settings) {
-//            return true;
-//        }
-//
+
         return super.onOptionsItemSelected(item);
     }
 
