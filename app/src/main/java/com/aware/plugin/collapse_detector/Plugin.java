@@ -13,7 +13,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.*;
-import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -24,9 +23,7 @@ import com.aware.Aware_Preferences;
 import com.aware.ESM;
 import com.aware.providers.ESM_Provider;
 import com.aware.utils.Aware_Plugin;
-import com.aware.plugin.collapse_detector.Homescreen;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.DatagramPacket;
@@ -147,7 +144,7 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
 //                        startActivity(intent2);
 
                         //shows ui for map and other information
-                        intent2 = new Intent(getApplicationContext(),MainActivity.class);
+                        intent2 = new Intent(getApplicationContext(),InfoPanel.class);
                         intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent2);
 

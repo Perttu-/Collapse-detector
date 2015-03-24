@@ -21,17 +21,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 
-
-public class MainActivity extends FragmentActivity {
+public class InfoPanel extends FragmentActivity {
     private String[] array;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -48,7 +39,7 @@ public class MainActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_info);
 
         array = getResources().getStringArray(R.array.items);
 
@@ -60,7 +51,7 @@ public class MainActivity extends FragmentActivity {
                 R.layout.drawer_listview_item, array));
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(mTitle);
+        //toolbar.setTitle(mTitle);
 
 
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
@@ -84,6 +75,12 @@ public class MainActivity extends FragmentActivity {
         };
 
         mDrawerLayout.setDrawerListener(mDrawerToggle);
+
+        toolbar.setTitle(array[0]);
+        Fragment fragment1 = new StartFragment();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.content_frame, fragment1).commit();
 
 
     }
@@ -128,6 +125,10 @@ public class MainActivity extends FragmentActivity {
         Fragment fragment = null;
         switch (position) {
             case 0:
+                fragment = new StartFragment();
+                break;
+
+            case 1:
                 //fragment = new GMapFragment();
                 //Needs to be fixed. Now this opens a new activity although it should open a fragment
                 intent2 = new Intent(getApplicationContext(), Homescreen.class);
@@ -135,15 +136,15 @@ public class MainActivity extends FragmentActivity {
                 startActivity(intent2);
                 break;
 
-            case 1:
+            case 2:
                 fragment = new FirstAidFragment();
                 break;
 
-            case 2:
+            case 3:
                 fragment = new SafetyFragment();
                 break;
 
-            case 3:
+            case 4:
                 fragment = new NewsFragment();
                 break;
 
@@ -156,6 +157,8 @@ public class MainActivity extends FragmentActivity {
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             fragmentTransaction.replace(R.id.content_frame, fragment).commit();
 
+
+
             // update selected item and title, then close the drawer
             mDrawerList.setItemChecked(position, true);
             mDrawerList.setSelection(position);
@@ -165,7 +168,7 @@ public class MainActivity extends FragmentActivity {
 
         }
 
-        if (fragment == null & position !=0) {
+        if (fragment == null & position !=1) {
             Toast.makeText(getApplicationContext(), "Fragment failed", Toast.LENGTH_SHORT).show();
         }
     }

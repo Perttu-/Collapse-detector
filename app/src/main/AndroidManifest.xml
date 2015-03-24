@@ -45,8 +45,8 @@
             android:value="AIzaSyDk3nx26wd0TrHszRY_RY7zYkpW_HvOQAg" />
 
         <activity
-            android:name=".MainActivity"
-            android:label="@string/title_activity_main" >
+            android:name=".InfoPanel"
+            android:label="@string/title_activity_info" >
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

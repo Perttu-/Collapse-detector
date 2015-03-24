@@ -1,14 +1,15 @@
 <resources>
-    <string name="app_name">collapse_detector</string>
+    <string name="app_name">Collapse detector</string>
     <string name="title_activity_homescreen">homescreen</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="API_KEY">AIzaSyBLJ9tXEwnUsV7EP66N13J7s_QXajfGwR4</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_info">Info panel</string>
 
 
     <string-array name="items">
+        <item>Home</item>
         <item>Map</item>
         <item>First aid</item>
         <item>Safety tips</item>
@@ -24,6 +25,36 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
+    <string name="welcome_text">In this info panel you will find information about building collapses in your area and safety tips. \n\n
+        Please choose action from top left menu.</string>
+
+    <string name="cpr_guide">
+        Basic CPR \n\n
+        1. Try to wake the victim up. \n\n
+        2. Call for help. \n\n
+        3. Open airway by tilting the victims head back. \n\n
+        4. Check breathing by listening and watching chest. \n\n
+        5. If the victim breaths put him/her in recovery position. \n\n
+        6. If the victim doesn\'t breath give 2 breaths and begin compressions. \n\n
+        7. Continue the cycle of 2 breaths and 30 compressions until help arrives.
+    </string>
+
+    <string name="safety_guide">
+        Safety during earthquake: \n
+        - Stay calm. \n
+        - Find cover, for example under a table. \n\n
+        Right after an earthquake: \n
+        - Put out all fires. \n
+        - Open door for exit. \n
+        - Stay away from falling objects \n\n
+        After an earthquake: \n
+        - Stay away from fires and tsunami. \n
+        - Listen to information from radio and TV. \n
+        - Make sure your family and neighbors are safe. \n
+        - Work together on rescue and first aid \n
+        - Turn of electricity and gas before evacuation.
+
+    </string>
 
 
 </resources>

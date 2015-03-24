@@ -13,7 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import com.google.android.gms.maps.CameraUpdate;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -61,8 +61,8 @@ public class Homescreen extends FragmentActivity implements LocationListener {
         Log.d(TAG, "Latitude: " + latitude + ", Longitude: " + longitude);
         LatLng latLng = new LatLng(latitude, longitude);
         marker = googleMap.addMarker(new MarkerOptions().position(latLng));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        googleMap.animateCamera(CameraUpdateFactory.zoomTo(10));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,10));
+        //googleMap.animateCamera(CameraUpdateFactory.zoomTo(10));
 
         // to get the address
         LocationAddress locationAddress = new LocationAddress();
