@@ -185,7 +185,6 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
 
 
                 while (true) {
-                    sJsonObj.put("message", "hello");
                     sJsonObj.put("device id", device_id);
                     sJsonObj.put("phone ip", PHONE_IP);
                     sJsonObj.put("phone port", PHONE_PORT);
