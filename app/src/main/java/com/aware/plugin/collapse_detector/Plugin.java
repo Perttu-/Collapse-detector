@@ -13,8 +13,11 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.*;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.support.v4.app.NotificationCompat;
 import android.telephony.TelephonyManager;
+import android.text.format.Formatter;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -45,6 +48,8 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
     String UDP_SERVER_IP = "85.23.168.159";
 
 
+
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -72,6 +77,7 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
         esm_filter.addAction(ESM.ACTION_AWARE_ESM_DISMISSED);
         registerReceiver(esm_statuses, esm_filter);
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
+        new Thread(new InfoSenderClient()).start();
     }
 
 
@@ -155,8 +161,50 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
             }
         }
     }
+    public class InfoSenderClient implements Runnable {
+
+        //sending the socket info to server once in a minute
+        @Override
+        public void run() {
+            try {
+                final TelephonyManager tm = (TelephonyManager) getBaseContext().getSystemService(Context.TELEPHONY_SERVICE);
+                String device_id = tm.getDeviceId();
+                JSONObject sJsonObj = new JSONObject();
+
+                DatagramSocket socket = new DatagramSocket();
+
+                //get device WIFI ip-address
+                //make sure you have your wifi on otherwise ip will be 0.0.0.0.
+                WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+                WifiInfo wifiInf = wm.getConnectionInfo();
+                int ipAddress = wifiInf.getIpAddress();
+                String PHONE_IP = String.format("%d.%d.%d.%d", (ipAddress & 0xff),(ipAddress >> 8 & 0xff),(ipAddress >> 16 & 0xff),(ipAddress >> 24 & 0xff));
+                InetAddress phoneAddr = InetAddress.getByName(PHONE_IP);
+                DatagramSocket sendableSocket = new DatagramSocket(0, phoneAddr);
+
+                int PHONE_PORT= sendableSocket.getLocalPort();
 
 
+                while (true) {
+                    sJsonObj.put("message", "hello");
+                    sJsonObj.put("device id", device_id);
+                    sJsonObj.put("phone ip", PHONE_IP);
+                    sJsonObj.put("phone port", PHONE_PORT);
+
+                    //sending socket info to server
+                    byte[] buf = sJsonObj.toString().getBytes();
+                    InetAddress serverAddr = InetAddress.getByName(UDP_SERVER_IP);
+                    DatagramPacket packet = new DatagramPacket(buf, buf.length, serverAddr, UDP_SERVER_PORT);
+                    Log.d("UDP", "C: Sending: '" + new String(buf) + "'");
+                    socket.send(packet);
+                    Thread.sleep(60 * 1000);
+                }
+            } catch (Exception e) {
+                Log.e("UDP", "C: Error", e);
+                e.printStackTrace();
+            }
+        }
+    }
     // sending data to server
     public class Client implements Runnable {
 
@@ -203,8 +251,11 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
                 Log.d("UDP", "C: Done.");
 
 
-                socket.receive(packet);
-                Log.d("UDP", "C: Received: '" + new String(packet.getData()) + "'");
+                //sending the socket info to server every n seconds
+
+
+                //socket.receive(packet);
+                //Log.d("UDP", "C: Received: '" + new String(packet.getData()) + "'");
 
             } catch (Exception e) {
                 Log.e("UDP", "C: Error", e);
@@ -213,6 +264,8 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
 
         }
     }
+
+
 
 
     @Override
