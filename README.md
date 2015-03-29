@@ -17,3 +17,10 @@ To do:
 - Warn user and display the collapse location on map.
 - More text and pictures to first aid and safety fragments.
 - Implement the news reporting functionality.
+
+
+socket info sended to server: 
+"message"
+"device id"
+"phone ip"
+"phone port"
