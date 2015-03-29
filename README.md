@@ -20,7 +20,6 @@ To do:
 
 
 socket info sended to server: 
-"message"
 "device id"
 "phone ip"
 "phone port"
