@@ -17,7 +17,6 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.support.v4.app.NotificationCompat;
 import android.telephony.TelephonyManager;
-import android.text.format.Formatter;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -174,7 +173,7 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
                 DatagramSocket socket = new DatagramSocket();
 
                 //get device WIFI ip-address
-                //make sure you have your wifi on otherwise ip will be 0.0.0.0.
+                //make sure you have your wifi on otherwise ip will be 0.0.0.0
                 WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
                 WifiInfo wifiInf = wm.getConnectionInfo();
                 int ipAddress = wifiInf.getIpAddress();
