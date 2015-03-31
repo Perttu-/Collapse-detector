@@ -31,6 +31,7 @@ import org.json.JSONObject;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Calendar;
 
 
 public class Plugin extends Aware_Plugin implements SensorEventListener {
@@ -40,7 +41,7 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
 
     private  final ESMStatusListener esm_statuses = new ESMStatusListener();
     public static Intent intent2;
-
+    boolean fall = false;
 
     //server details
     int UDP_SERVER_PORT = 80;
@@ -76,7 +77,9 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
         esm_filter.addAction(ESM.ACTION_AWARE_ESM_DISMISSED);
         registerReceiver(esm_statuses, esm_filter);
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
-        new Thread(new InfoSenderClient()).start();
+        //new Thread(new InfoSenderClient()).start();
+
+        new Thread(new Client()).start();
     }
 
 
@@ -87,6 +90,7 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+
         double x = event.values[0];
         double y = event.values[1];
         double z = event.values[2];
@@ -100,7 +104,7 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
             notifyUser();
 
             // send data to server
-            new Thread(new Client()).start();
+            fall = true;
 
 
         }
@@ -108,12 +112,10 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
 
     // notify user that a fall was detected
     void notifyUser() {
-
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
         mBuilder.setSmallIcon(R.drawable.ic_launcher);
         mBuilder.setContentTitle("Phone fall detected");
         mBuilder.setContentText("Please confirm");
-
 
         int mNotificationId = 001;
         Intent intent1 = new Intent(this, PopUp.class);
@@ -143,10 +145,6 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
 
                     if (ans.equalsIgnoreCase("Yes")) {
                         Log.d(TAG, "answer is yes, homescreen shows up");
-                        //shows map UI
-//                        intent2 = new Intent(getApplicationContext(), Homescreen.class);
-//                        intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                        startActivity(intent2);
 
                         //shows ui for map and other information
                         intent2 = new Intent(getApplicationContext(),InfoPanel.class);
@@ -160,57 +158,18 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
             }
         }
     }
-    public class InfoSenderClient implements Runnable {
 
-        //sending the socket info to server once in a minute
-        @Override
-        public void run() {
-            try {
-                final TelephonyManager tm = (TelephonyManager) getBaseContext().getSystemService(Context.TELEPHONY_SERVICE);
-                String device_id = tm.getDeviceId();
-                JSONObject sJsonObj = new JSONObject();
-
-                DatagramSocket socket = new DatagramSocket();
-
-                //get device WIFI ip-address
-                //make sure you have your wifi on otherwise ip will be 0.0.0.0
-                WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
-                WifiInfo wifiInf = wm.getConnectionInfo();
-                int ipAddress = wifiInf.getIpAddress();
-                String PHONE_IP = String.format("%d.%d.%d.%d", (ipAddress & 0xff),(ipAddress >> 8 & 0xff),(ipAddress >> 16 & 0xff),(ipAddress >> 24 & 0xff));
-                InetAddress phoneAddr = InetAddress.getByName(PHONE_IP);
-                DatagramSocket sendableSocket = new DatagramSocket(0, phoneAddr);
-
-                int PHONE_PORT= sendableSocket.getLocalPort();
-
-
-                while (true) {
-                    sJsonObj.put("device id", device_id);
-                    //sJsonObj.put("phone ip", PHONE_IP);
-                    //sJsonObj.put("phone port", PHONE_PORT);
-
-                    //sending socket info to server
-                    byte[] buf = sJsonObj.toString().getBytes();
-                    InetAddress serverAddr = InetAddress.getByName(UDP_SERVER_IP);
-                    DatagramPacket packet = new DatagramPacket(buf, buf.length, serverAddr, UDP_SERVER_PORT);
-                    Log.d("UDP", "C: Sending: '" + new String(buf) + "'");
-                    socket.send(packet);
-                    Thread.sleep(60 * 1000);
-                }
-            } catch (Exception e) {
-                Log.e("UDP", "C: Error", e);
-                e.printStackTrace();
-            }
-        }
-    }
     // sending data to server
     public class Client implements Runnable {
 
         @Override
         public void run() {
             try {
+                Log.d("test","client start");
                 //current timestamp
                 Long timestamp = System.currentTimeMillis();
+
+                int seconds;
 
                 //get longitude and latitude
                 LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -224,36 +183,43 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
                 final TelephonyManager tm = (TelephonyManager) getBaseContext().getSystemService(Context.TELEPHONY_SERVICE);
                 String device_id = tm.getDeviceId();
 
-                // Here we convert Java Object to JSON
-                JSONObject jsonObj = new JSONObject();
-                jsonObj.put("timestamp", timestamp);
-                jsonObj.put("latitude", latitude);
-                jsonObj.put("longitude", longitude);
-                jsonObj.put("device id", device_id);
-
                 // Retrieve the ServerName
                 InetAddress serverAddr = InetAddress.getByName(UDP_SERVER_IP);
                 Log.d("UDP", "C: Connecting...");
+
                 //Create new UDP-Socket
                 DatagramSocket socket = new DatagramSocket();
 
-                //Prepare some data to be sent
-                byte[] buf = jsonObj.toString().getBytes();
-                //Create UDP-packet with data & destination(url+port)
-                DatagramPacket packet = new DatagramPacket(buf, buf.length, serverAddr, UDP_SERVER_PORT);
-                Log.d("UDP", "C: Sending: '" + new String(buf) + "'");
+                // Here we convert Java Object to JSON
+                JSONObject jsonObj = new JSONObject();
+                boolean monitoring =true;
+                while(monitoring) {
+                    Calendar calendar = Calendar.getInstance();
 
-                //Send out the packet */
-                socket.send(packet);
-                Log.d("UDP", "C: Sent.");
-                Log.d("UDP", "C: Done.");
+                    if (fall) {
+                        jsonObj.put("timestamp", timestamp);
+                        jsonObj.put("latitude", latitude);
+                        jsonObj.put("longitude", longitude);
+                        jsonObj.put("device id", device_id);
+                        Log.d("test", "fall_json");
+                        send(socket, jsonObj,serverAddr);
+                        fall = false;
+                        //monitoring = false;
+                    }
+                    if (calendar.get(Calendar.SECOND)==0 && calendar.get(Calendar.MILLISECOND)==0) {
+                        jsonObj.put("device id", device_id);
+                        Log.d("test", "sync_json");
+                        send(socket, jsonObj,serverAddr);
+                        //monitoring = false;
+                    }
+                }
 
 
                 //sending the socket info to server every n seconds
 
 
                 //socket.receive(packet);
-                //Log.d("UDP", "C: Received: '" + new String(packet.getData()) + "'");
+               // Log.d("UDP", "C: Received: '" + new String(packet.getData()) + "'");
 
             } catch (Exception e) {
                 Log.e("UDP", "C: Error", e);
@@ -261,9 +227,24 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
             }
 
         }
+    public void send(DatagramSocket socket, JSONObject jsonObj, InetAddress serverAddr){
+
+
+        //Prepare some data to be sent
+        byte[] buf = jsonObj.toString().getBytes();
+
+        //Create UDP-packet with data & destination(url+port)
+        DatagramPacket packet = new DatagramPacket(buf, buf.length, serverAddr, UDP_SERVER_PORT);
+        Log.d("UDP", "C: Sending: '" + new String(buf) + "'");
+        Log.d("test", "sending... ");
+
+        //Send out the packet */
+//                socket.send(packet);
+//                Log.d("UDP", "C: Sent.");
+//                Log.d("UDP", "C: Done.");
+
     }
-
-
+    }
 
 
     @Override
