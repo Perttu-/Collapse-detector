@@ -9,6 +9,7 @@ This is just the phone client implementation.
 Completed features:
 - Detects phone fall from accelerometer values.
 - Sends timestamp, device id and location (latitude and longitude) to server.
+- Sends device id once in every minute to server
 - Provides first aid and safety tips.
 
 To do:
@@ -19,7 +20,4 @@ To do:
 - Implement the news reporting functionality.
 
 
-socket info sended to server: 
-"device id"
-"phone ip"
-"phone port"
+
