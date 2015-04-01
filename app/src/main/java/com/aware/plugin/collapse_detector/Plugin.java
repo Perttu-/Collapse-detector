@@ -47,6 +47,7 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
     String UDP_SERVER_IP = "85.23.168.159";
 
     public boolean monitoring = true;
+    boolean run = true;
 
 
 
@@ -54,16 +55,12 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
     @Override
     public void onCreate() {
         super.onCreate();
-        //uncomment to test activity without fall event
-//        intent2 = new Intent(getApplicationContext(),MainActivity.class);
-//        intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//        startActivity(intent2);
+
         Toast.makeText(getApplicationContext(),"Monitoring Started", Toast.LENGTH_SHORT).show();
 
         TAG = "collapse_detector";
         DEBUG = Aware.getSetting(this, Aware_Preferences.DEBUG_FLAG).equals("true");
         if( DEBUG ) Log.d(TAG, "collapse_detector plugin running");
-
 
 
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -78,9 +75,11 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
         esm_filter.addAction(ESM.ACTION_AWARE_ESM_DISMISSED);
         registerReceiver(esm_statuses, esm_filter);
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
-        //new Thread(new InfoSenderClient()).start();
+
 
         new Thread(new Client()).start();
+
+
     }
 
 
@@ -99,14 +98,11 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
         double vector_sum = Math.sqrt(x*x + y*y + z*z);
 
         //the acceleration is around 0.3 as its lowest when in free fall. This may depend on the phone used.
-        if (vector_sum < 0.3){
-            //Toast.makeText(getApplicationContext(),"I fell down!", Toast.LENGTH_LONG).show();
+        if (vector_sum < 0.3 && !fall){
+            Toast.makeText(getApplicationContext(),"I fell down!", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Vector sum: " + vector_sum);
             notifyUser();
-
-            // send data to server
             fall = true;
-
 
         }
     }
@@ -197,13 +193,15 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
                 TimerTask task = new TimerTask() {
                     @Override
                     public void run() {
-                        try {
-                            id_json.put("device id", device_id);
-                            send(socket, id_json, serverAddr);
+                        if (run) {
+                            try {
+                                id_json.put("device id", device_id);
+                                send(socket, id_json, serverAddr);
 
-                        } catch (Exception e) {
-                            Log.e("JSON", "Error", e);
-                            e.printStackTrace();
+                            } catch (Exception e) {
+                                Log.e("JSON", "Error", e);
+                                e.printStackTrace();
+                            }
                         }
                     }
                 };
@@ -221,6 +219,13 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
                         fall_json.put("device id", device_id);
 
                         send(socket, fall_json, serverAddr);
+                        //waiting for one second before allowing to fall event to be sent again
+                        try {
+                            Thread.sleep(1000);
+                        } catch(InterruptedException ex) {
+                            Thread.currentThread().interrupt();
+                        }
+
                         fall = false;
                     }
                 }
@@ -251,7 +256,6 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
                 Log.d("UDP", "C: Sent.");
 
 
-
             } catch (Exception e) {
                 Log.e("UDP", "Error", e);
                 e.printStackTrace();
@@ -262,7 +266,8 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        monitoring=false;
+        monitoring = false;
+        run = false;
         unregisterReceiver(esm_statuses);
         Aware.setSetting(getApplicationContext(), Aware_Preferences.STATUS_ESM, false);
         if( DEBUG ) Log.d(TAG, "collapse_detector plugin terminated");
