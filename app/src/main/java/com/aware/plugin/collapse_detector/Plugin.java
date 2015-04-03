@@ -12,25 +12,17 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.*;
 import android.support.v4.app.NotificationCompat;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
-
 import com.aware.Aware;
 import com.aware.Aware_Preferences;
 import com.aware.ESM;
 import com.aware.providers.ESM_Provider;
 import com.aware.utils.Aware_Plugin;
 
-import org.json.JSONObject;
+import java.util.ArrayList;
 
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.util.Timer;
-import java.util.TimerTask;
 
 
 public class Plugin extends Aware_Plugin implements SensorEventListener {
@@ -42,15 +34,11 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
     public static Intent intent2;
     boolean fall = false;
 
-    //server details
-    int UDP_SERVER_PORT = 80;
-    String UDP_SERVER_IP = "85.23.168.159";
+    Client client = null;
 
     public boolean monitoring = true;
     boolean run = true;
-
-
-
+    ArrayList coordinates;
 
     @Override
     public void onCreate() {
@@ -77,7 +65,8 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
 
 
-        new Thread(new Client()).start();
+        client = new Client(this);
+        new Thread(client).start();
 
 
     }
@@ -98,11 +87,12 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
         double vector_sum = Math.sqrt(x*x + y*y + z*z);
 
         //the acceleration is around 0.3 as its lowest when in free fall. This may depend on the phone used.
-        if (vector_sum < 0.3 && !fall){
-            Toast.makeText(getApplicationContext(),"I fell down!", Toast.LENGTH_SHORT).show();
+        if (vector_sum < 0.3 ){
+
             Log.d(TAG, "Vector sum: " + vector_sum);
             notifyUser();
             fall = true;
+            client.setFall(true);
 
         }
     }
@@ -122,6 +112,7 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
         mBuilder.setAutoCancel(true);
         NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mNotifyMgr.notify(mNotificationId, mBuilder.build());
+
 
     }
 
@@ -156,118 +147,13 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
         }
     }
 
-    // sending data to server
-    public class Client implements Runnable {
-
-        @Override
-        public void run() {
-            try {
-                Log.d("test", "client start");
-                //current timestamp
-                Long timestamp = System.currentTimeMillis();
-
-                //get longitude and latitude
-                LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-                Criteria criteria = new Criteria();
-                String bestProvider = locationManager.getBestProvider(criteria, true);
-                android.location.Location location = locationManager.getLastKnownLocation(bestProvider);
-                double latitude = location.getLatitude();
-                double longitude = location.getLongitude();
-
-                //get device id
-                final TelephonyManager tm = (TelephonyManager) getBaseContext().getSystemService(Context.TELEPHONY_SERVICE);
-                final String device_id = tm.getDeviceId();
-
-                // Retrieve the ServerName
-                final InetAddress serverAddr = InetAddress.getByName(UDP_SERVER_IP);
-                Log.d("UDP", "C: Connecting...");
-
-                //Create new UDP-Socket
-                final DatagramSocket socket = new DatagramSocket();
-
-                // Here we convert Java Object to JSON
-                final JSONObject fall_json = new JSONObject();
-                final JSONObject id_json = new JSONObject();
-
-                //using timer to send device id once in a minute
-                TimerTask task = new TimerTask() {
-                    @Override
-                    public void run() {
-                        if (run) {
-                            try {
-                                id_json.put("device id", device_id);
-                                send(socket, id_json, serverAddr);
-
-                            } catch (Exception e) {
-                                Log.e("JSON", "Error", e);
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                };
-
-                Timer timer = new Timer();
-                long delay = 0;
-                long intervalPeriod = 60000;
-                timer.scheduleAtFixedRate(task, delay, intervalPeriod);
-
-                while (monitoring) {
-                    if (fall) {
-                        fall_json.put("timestamp", timestamp);
-                        fall_json.put("latitude", latitude);
-                        fall_json.put("longitude", longitude);
-                        fall_json.put("device id", device_id);
-
-                        send(socket, fall_json, serverAddr);
-                        //waiting for one second before allowing to fall event to be sent again
-                        try {
-                            Thread.sleep(1000);
-                        } catch(InterruptedException ex) {
-                            Thread.currentThread().interrupt();
-                        }
-
-                        fall = false;
-                    }
-                }
-
-
-                //socket.receive(packet);
-                // Log.d("UDP", "C: Received: '" + new String(packet.getData()) + "'");
-
-            } catch (Exception e) {
-                Log.e("JSON", "Error", e);
-                e.printStackTrace();
-            }
-
-        }
-
-        public void send(DatagramSocket socket, JSONObject jsonObj, InetAddress serverAddr) {
-
-            try {
-                //Prepare some data to be sent
-                byte[] buf = jsonObj.toString().getBytes();
-
-                //Create UDP-packet with data & destination(url+port)
-                DatagramPacket packet = new DatagramPacket(buf, buf.length, serverAddr, UDP_SERVER_PORT);
-                Log.d("UDP", "C: Sending: '" + new String(buf) + "'");
-
-                //Send out the packet */
-                socket.send(packet);
-                Log.d("UDP", "C: Sent.");
-
-
-            } catch (Exception e) {
-                Log.e("UDP", "Error", e);
-                e.printStackTrace();
-            }
-        }
-    }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         monitoring = false;
-        run = false;
+        run=false;
+
         unregisterReceiver(esm_statuses);
         Aware.setSetting(getApplicationContext(), Aware_Preferences.STATUS_ESM, false);
         if( DEBUG ) Log.d(TAG, "collapse_detector plugin terminated");

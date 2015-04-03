@@ -129,7 +129,7 @@ public class InfoPanel extends FragmentActivity {
                 break;
 
             case 1:
-                //fragment = new GMapFragment();
+               // fragment = new GMapFragment();
                 //Needs to be fixed. Now this opens a new activity although it should open a fragment
                 intent2 = new Intent(getApplicationContext(), Homescreen.class);
                 intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -157,18 +157,14 @@ public class InfoPanel extends FragmentActivity {
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             fragmentTransaction.replace(R.id.content_frame, fragment).commit();
 
-
-
             // update selected item and title, then close the drawer
             mDrawerList.setItemChecked(position, true);
             mDrawerList.setSelection(position);
             toolbar.setTitle(array[position]);
             mDrawerLayout.closeDrawer(mDrawerList);
-
-
         }
 
-        if (fragment == null & position !=1) {
+        if (fragment == null) {
             Toast.makeText(getApplicationContext(), "Fragment failed", Toast.LENGTH_SHORT).show();
         }
     }

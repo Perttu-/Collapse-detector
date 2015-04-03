@@ -21,32 +21,41 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+
+
 
 public class Homescreen extends FragmentActivity implements LocationListener {
 
     GoogleMap googleMap;
     String TAG = "collapse_detector";
     Marker marker;
+    ArrayList markerList;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_homescreen);
 
-
-
-        SupportMapFragment supportMapFragment =
-                (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.googleMap);
+        SupportMapFragment supportMapFragment =(SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.googleMap);
         googleMap = supportMapFragment.getMap();
         googleMap.setMyLocationEnabled(true);
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         Criteria criteria = new Criteria();
         String bestProvider = locationManager.getBestProvider(criteria, true);
         Location location = locationManager.getLastKnownLocation(bestProvider);
+
         if (location != null) {
             onLocationChanged(location);
         }
         locationManager.requestLocationUpdates(bestProvider, 20000, 0, this);
+
+
+
+    }
+
+    public void addMarker(){
 
     }
 
@@ -62,13 +71,10 @@ public class Homescreen extends FragmentActivity implements LocationListener {
         LatLng latLng = new LatLng(latitude, longitude);
         marker = googleMap.addMarker(new MarkerOptions().position(latLng));
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,10));
-        //googleMap.animateCamera(CameraUpdateFactory.zoomTo(10));
 
         // to get the address
         LocationAddress locationAddress = new LocationAddress();
-        locationAddress.getAddressFromLocation(latitude, longitude,
-        getApplicationContext(), new GeocoderHandler());
-
+        locationAddress.getAddressFromLocation(latitude, longitude, getApplicationContext(), new GeocoderHandler());
     }
 
 
