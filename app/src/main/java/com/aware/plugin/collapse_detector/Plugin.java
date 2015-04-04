@@ -38,7 +38,6 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
 
     public boolean monitoring = true;
     boolean run = true;
-    ArrayList coordinates;
 
     @Override
     public void onCreate() {
@@ -50,11 +49,9 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
         DEBUG = Aware.getSetting(this, Aware_Preferences.DEBUG_FLAG).equals("true");
         if( DEBUG ) Log.d(TAG, "collapse_detector plugin running");
 
-
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
-
 
         // ESM plugin for pop-up question after a fall is detected
         Aware.setSetting(getApplicationContext(), Aware_Preferences.STATUS_ESM, true);
@@ -63,7 +60,6 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
         esm_filter.addAction(ESM.ACTION_AWARE_ESM_DISMISSED);
         registerReceiver(esm_statuses, esm_filter);
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
-
 
         client = new Client(this);
         new Thread(client).start();
@@ -151,12 +147,15 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        monitoring = false;
-        run=false;
+
 
         unregisterReceiver(esm_statuses);
         Aware.setSetting(getApplicationContext(), Aware_Preferences.STATUS_ESM, false);
         if( DEBUG ) Log.d(TAG, "collapse_detector plugin terminated");
         mSensorManager.unregisterListener(this, mAccelerometer);
+
+        monitoring = false;
+        run=false;
+        client.setRun(false);
     }
 }

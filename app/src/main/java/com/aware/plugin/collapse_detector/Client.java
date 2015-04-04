@@ -11,6 +11,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -23,6 +24,7 @@ public class Client implements Runnable {
     String UDP_SERVER_IP = "85.23.168.159";
     LocationManager locationManager;
     TelephonyManager telephonyManager;
+    DatabaseHandler db;
     boolean run=true;
     boolean monitoring=true;
     boolean fall = false;
@@ -33,28 +35,38 @@ public class Client implements Runnable {
 
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+        db = new DatabaseHandler(context);
     }
 
     public void setFall(boolean pFall){
         this.fall=pFall;
     }
 
-    public ArrayList getCoordinates(){
-        return this.coordinates;
+    public void setRun(Boolean pRun){
+        this.run = pRun;
+        this.monitoring = pRun;
     }
+
 
     @Override
     public void run() {
         try {
-            Log.d("test", "client start");
-            //current timestamp
-            Long timestamp = System.currentTimeMillis();
-            //get longitude and latitude
+            //uncomment to clear the database
+
+//            Log.d("test", "client start");
+//            Log.d("test", "client start");
+//            List<CollapseInfo> coll_list=db.getAllCollapses();
+//            for(CollapseInfo ci : coll_list){
+//                db.deleteCollapse(ci);
+//            }
+
+
 
             Criteria criteria = new Criteria();
             String bestProvider = locationManager.getBestProvider(criteria, true);
             android.location.Location location = locationManager.getLastKnownLocation(bestProvider);
 
+            //get longitude and latitude
             double latitude = location.getLatitude();
             double longitude = location.getLongitude();
 
@@ -81,30 +93,16 @@ public class Client implements Runnable {
             TimerTask receivingTask = new TimerTask() {
                 @Override
                 public void run() {
-                    if (run) {
-                        try {
-
-                        } catch (Exception e){
-                            Log.e("UDP", "Error decrypting data", e);
-                            e.printStackTrace();
-                        }
+                    if (run && !socket.isClosed()) {
 
                         try {
-
-
                             socket.receive(packet);
                             String receivedString = new String(packet.getData());
                             Log.d("UDP", "C: Received: '" + receivedString + "'");
 
-
-                            LatLng latlng = new LatLng(65,25);
-                            if(!coordinates.contains(latlng)) {
-                                coordinates.add(latlng);
-                                Log.d("test", "contents" + coordinates.get(0) + "'");
-//                                for (int i = 0; i < coordinates.size(); i++) {
-//                                    Log.d("test", "contents" + coordinates.get(i) + "'");
-//                                }
-                            }
+                            final Long timestamp = System.currentTimeMillis();
+                            //saves the received encrypted data and its time of arrival to database
+                            db.addCollapse(new CollapseInfo(timestamp, receivedString));
 
                         } catch (Exception e) {
                             Log.e("UDP", "Error receiving data", e);
@@ -147,6 +145,7 @@ public class Client implements Runnable {
 
             while (monitoring) {
                 if (fall) {
+                    final Long timestamp = System.currentTimeMillis();
                     fall_json.put("timestamp", timestamp);
                     fall_json.put("latitude", latitude);
                     fall_json.put("longitude", longitude);
@@ -164,7 +163,7 @@ public class Client implements Runnable {
                 }
             }
 
-            socket.close();
+
 
         } catch (Exception e) {
             Log.e("JSON", "Error", e);

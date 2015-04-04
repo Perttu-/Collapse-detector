@@ -18,8 +18,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import java.util.List;
 
 
 public class InfoPanel extends FragmentActivity {
@@ -83,8 +86,16 @@ public class InfoPanel extends FragmentActivity {
         fragmentTransaction.replace(R.id.content_frame, fragment1).commit();
 
 
+
     }
 
+    private void clearDatabase(){
+        DatabaseHandler db = new DatabaseHandler(this);
+        List<CollapseInfo> coll_list=db.getAllCollapses();
+        for(CollapseInfo ci : coll_list){
+            db.deleteCollapse(ci);
+        }
+    }
 
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
             @Override
@@ -144,9 +155,7 @@ public class InfoPanel extends FragmentActivity {
                 fragment = new SafetyFragment();
                 break;
 
-            case 4:
-                fragment = new NewsFragment();
-                break;
+
 
             default:
                 break;
@@ -162,10 +171,11 @@ public class InfoPanel extends FragmentActivity {
             mDrawerList.setSelection(position);
             toolbar.setTitle(array[position]);
             mDrawerLayout.closeDrawer(mDrawerList);
+
         }
 
         if (fragment == null) {
-            Toast.makeText(getApplicationContext(), "Fragment failed", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "Fragment failed", Toast.LENGTH_SHORT).show();
         }
     }
 
