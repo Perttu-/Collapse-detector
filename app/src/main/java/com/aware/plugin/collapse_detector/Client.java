@@ -51,16 +51,7 @@ public class Client implements Runnable {
     @Override
     public void run() {
         try {
-            //uncomment to clear the database
-
-//            Log.d("test", "client start");
-//            Log.d("test", "client start");
-//            List<CollapseInfo> coll_list=db.getAllCollapses();
-//            for(CollapseInfo ci : coll_list){
-//                db.deleteCollapse(ci);
-//            }
-
-
+            Log.d("test", "client start");
 
             Criteria criteria = new Criteria();
             String bestProvider = locationManager.getBestProvider(criteria, true);

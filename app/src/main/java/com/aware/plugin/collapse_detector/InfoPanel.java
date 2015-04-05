@@ -18,9 +18,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -142,7 +140,7 @@ public class InfoPanel extends FragmentActivity {
             case 1:
                // fragment = new GMapFragment();
                 //Needs to be fixed. Now this opens a new activity although it should open a fragment
-                intent2 = new Intent(getApplicationContext(), Homescreen.class);
+                intent2 = new Intent(getApplicationContext(), MapScreen.class);
                 intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent2);
                 break;
@@ -154,7 +152,9 @@ public class InfoPanel extends FragmentActivity {
             case 3:
                 fragment = new SafetyFragment();
                 break;
-
+            case 4:
+                fragment = new DebugFragment();
+                break;
 
 
             default:
@@ -171,6 +171,7 @@ public class InfoPanel extends FragmentActivity {
             mDrawerList.setSelection(position);
             toolbar.setTitle(array[position]);
             mDrawerLayout.closeDrawer(mDrawerList);
+
 
         }
 

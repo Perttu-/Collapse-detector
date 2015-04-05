@@ -128,7 +128,7 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
                     Log.d(TAG, "User answer ----- " + ans);
 
                     if (ans.equalsIgnoreCase("Yes")) {
-                        Log.d(TAG, "answer is yes, homescreen shows up");
+                        Log.d(TAG, "answer is yes, mapScreen shows up");
 
                         //shows ui for map and other information
                         intent2 = new Intent(getApplicationContext(),InfoPanel.class);

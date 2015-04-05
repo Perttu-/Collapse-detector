@@ -13,6 +13,7 @@
         <item>Map</item>
         <item>First aid</item>
         <item>Safety tips</item>
+        <item>Debug</item>
 
 
     </string-array>
@@ -25,7 +26,8 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="welcome_text">In this info panel you will find information about building collapses in your area and safety tips. \n\n
+    <string name="welcome_text">
+        In this info panel you will find information about building collapses in your area and safety tips. \n\n
         Please choose action from top left menu.</string>
 
     <string name="cpr_guide">
@@ -46,12 +48,12 @@
         Right after an earthquake: \n
         - Put out all fires. \n
         - Open door for exit. \n
-        - Stay away from falling objects \n\n
+        - Stay away from falling objects. \n\n
         After an earthquake: \n
         - Stay away from fires and tsunami. \n
         - Listen to information from radio and TV. \n
         - Make sure your family and neighbors are safe. \n
-        - Work together on rescue and first aid \n
+        - Work together on rescue and first aid. \n
         - Turn of electricity and gas before evacuation.
 
     </string>

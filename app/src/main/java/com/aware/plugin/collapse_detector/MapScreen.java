@@ -30,7 +30,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 
-public class Homescreen extends FragmentActivity implements LocationListener {
+public class MapScreen extends FragmentActivity implements LocationListener {
 
     GoogleMap googleMap;
     String TAG = "collapse_detector";
@@ -40,7 +40,7 @@ public class Homescreen extends FragmentActivity implements LocationListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_homescreen);
+        setContentView(R.layout.activity_mapscreen);
 
         SupportMapFragment supportMapFragment =(SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.googleMap);
         googleMap = supportMapFragment.getMap();
