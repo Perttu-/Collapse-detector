@@ -1,25 +1,25 @@
 package com.aware.plugin.collapse_detector;
 
+
 import android.content.Context;
-import android.location.Criteria;
+import android.database.Cursor;
 import android.location.LocationManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import com.google.android.gms.maps.model.LatLng;
+import android.widget.Toast;
+import com.aware.providers.Locations_Provider;
 import org.json.JSONObject;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 
 
+
 // receiving and sending data with server
 public class Client implements Runnable {
-
     int UDP_SERVER_PORT = 80;
     String UDP_SERVER_IP = "85.23.168.159";
     LocationManager locationManager;
@@ -28,11 +28,12 @@ public class Client implements Runnable {
     boolean run=true;
     boolean monitoring=true;
     boolean fall = false;
+    Context context;
 
-    ArrayList coordinates = new ArrayList() ;
+
 
     public Client(Context context){
-
+        this.context = context;
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
         db = new DatabaseHandler(context);
@@ -53,13 +54,6 @@ public class Client implements Runnable {
         try {
             Log.d("test", "client start");
 
-            Criteria criteria = new Criteria();
-            String bestProvider = locationManager.getBestProvider(criteria, true);
-            android.location.Location location = locationManager.getLastKnownLocation(bestProvider);
-
-            //get longitude and latitude
-            double latitude = location.getLatitude();
-            double longitude = location.getLongitude();
 
             //get device id
             final String device_id=telephonyManager.getDeviceId();
@@ -90,6 +84,7 @@ public class Client implements Runnable {
                             socket.receive(packet);
                             String receivedString = new String(packet.getData());
                             Log.d("UDP", "C: Received: '" + receivedString + "'");
+                            Toast.makeText(context, "Received: "+receivedString, Toast.LENGTH_SHORT).show();
 
                             final Long timestamp = System.currentTimeMillis();
                             //saves the received encrypted data and its time of arrival to database
@@ -132,10 +127,33 @@ public class Client implements Runnable {
             long intervalPeriod = 60000;
             timer.scheduleAtFixedRate(task, delay, intervalPeriod);
 
-
-
             while (monitoring) {
                 if (fall) {
+                    //get location
+//                    Criteria criteria = new Criteria();
+//                    String bestProvider = locationManager.getBestProvider(criteria, true);
+//                    android.location.Location location = locationManager.getLastKnownLocation(bestProvider);
+//                    if(location != null) {
+//                        latitude = location.getLatitude();
+//                        longitude = location.getLongitude();
+//                    }
+//                    else{
+//                        Log.d("test", "Couldn't find location");
+//                    }
+
+                    //getting the user location now with AWARE
+
+                    String [] selections = new String[2];
+                    selections[0] = "double_latitude";
+                    selections[1] = "double_longitude";
+                    Cursor gps_data = context.getContentResolver().query(Locations_Provider.Locations_Data.CONTENT_URI, selections, null, null, "timestamp DESC");
+                    gps_data.moveToFirst();
+                    String sLatitude = gps_data.getString(gps_data.getColumnIndex("double_latitude"));
+                    String sLongitude = gps_data.getString(gps_data.getColumnIndex("double_longitude"));
+                    Log.d("test", "LOCATION: lat: "+sLatitude+" long: "+sLongitude);
+                    double latitude = Double.parseDouble(sLatitude);
+                    double longitude = Double.parseDouble(sLongitude);
+
                     final Long timestamp = System.currentTimeMillis();
                     fall_json.put("timestamp", timestamp);
                     fall_json.put("latitude", latitude);
@@ -153,8 +171,6 @@ public class Client implements Runnable {
                     fall = false;
                 }
             }
-
-
 
         } catch (Exception e) {
             Log.e("JSON", "Error", e);
@@ -184,5 +200,6 @@ public class Client implements Runnable {
             e.printStackTrace();
         }
     }
+
 
 }

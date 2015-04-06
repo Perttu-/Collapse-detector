@@ -1,6 +1,7 @@
 package com.aware.plugin.collapse_detector;
 
 
+
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -21,7 +22,6 @@ import com.aware.ESM;
 import com.aware.providers.ESM_Provider;
 import com.aware.utils.Aware_Plugin;
 
-import java.util.ArrayList;
 
 
 
@@ -48,10 +48,15 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
         TAG = "collapse_detector";
         DEBUG = Aware.getSetting(this, Aware_Preferences.DEBUG_FLAG).equals("true");
         if( DEBUG ) Log.d(TAG, "collapse_detector plugin running");
-
+        //accelerometer on
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+
+        //aware gps on
+        Aware.setSetting(getApplicationContext(), Aware_Preferences.STATUS_LOCATION_GPS, true);
+        Intent activate_gps = new Intent(Aware.ACTION_AWARE_REFRESH);
+        sendBroadcast(activate_gps);
 
         // ESM plugin for pop-up question after a fall is detected
         Aware.setSetting(getApplicationContext(), Aware_Preferences.STATUS_ESM, true);
@@ -153,6 +158,11 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
         Aware.setSetting(getApplicationContext(), Aware_Preferences.STATUS_ESM, false);
         if( DEBUG ) Log.d(TAG, "collapse_detector plugin terminated");
         mSensorManager.unregisterListener(this, mAccelerometer);
+
+        Aware.setSetting(getApplicationContext(), Aware_Preferences.STATUS_LOCATION_GPS, false);
+        Intent activate_gps = new Intent(Aware.ACTION_AWARE_REFRESH);
+        sendBroadcast(activate_gps);
+
 
         monitoring = false;
         run=false;

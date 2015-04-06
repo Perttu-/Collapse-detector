@@ -70,6 +70,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 collapseInfoList.add(collapse);
             } while (cursor.moveToNext());
         }
+        db.close();
         return collapseInfoList;
     }
 
