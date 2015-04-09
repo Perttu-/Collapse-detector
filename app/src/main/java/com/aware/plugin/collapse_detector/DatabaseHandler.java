@@ -6,6 +6,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +44,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_TIMESTAMP, collapse.getTimestamp());
         values.put(INFO, collapse.getInfo());
         db.insert(TABLE_COLLAPSES, null, values);
+        Log.d("DATABASE", "Added.");
         db.close();
     }
 
