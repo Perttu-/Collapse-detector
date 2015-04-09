@@ -68,26 +68,32 @@ public class MapScreen extends FragmentActivity implements LocationListener {
         Log.d("test", "LOCATION: lat: "+sLatitude+" long: "+sLongitude);
         double latitude = Double.parseDouble(sLatitude);
         double longitude = Double.parseDouble(sLongitude);
-       LatLng myLocation = new LatLng(latitude, longitude);
+        gps_data.close();
+        LatLng myLocation = new LatLng(latitude, longitude);
 
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation,10));
 
 
         List<CollapseInfo> collapses = db.getAllCollapses();
         for (CollapseInfo ci : collapses) {
-            String coordinates = ci.getCoordinates();
-            Long timestamp =ci.getTimestamp();
+            String info = ci.getInfo();
+            Long timestamp = ci.getTimestamp();
             SimpleDateFormat sdf = new SimpleDateFormat("MM.dd.yyyy HH:mm ");
             String date = sdf.format(timestamp);
-            //this if statement ignores encrypted data
-            if (coordinates.charAt(0) == '[') {
 
-                String collapseDecrypted = coordinates;
-                LatLng collapseLocation = parseCoordinates(collapseDecrypted);
+            //this if statement is just a workaround to ignore encrypted data
+            if (info.charAt(0) == '[') {
+
+                String collapseDecrypted = info;
+                //LatLng collapseLocation = parseInfo(collapseDecrypted);
+                InfoParser ip = new InfoParser(collapseDecrypted);
+                LatLng collapseLocation = ip.getLatLng();
+                String id = ip.getId();
+                int count = ip.getCount();
                 marker = googleMap.addMarker(new MarkerOptions()
                         .position(collapseLocation)
                         .title("Building collapse")
-                        .snippet(date));
+                        .snippet("Date: " + date + "\n Id: " + id + "\n Fall count: "+count ));//not tested
             }
 
         }
@@ -115,14 +121,37 @@ public class MapScreen extends FragmentActivity implements LocationListener {
 //        }
 //    }
 
-
-    public LatLng parseCoordinates(String receivedString){
-        //getting LatLng of received decrypted string
-        double receivedLatitude = Double.parseDouble(receivedString.split(",")[0].replace("[",""));
-        double receivedLongitude = Double.parseDouble(receivedString.split(",")[1].replace("]","").replace(" ",""));
+        //not tested
+    public LatLng parseInfo(String receivedString){
+        //extracting all the info from the string
+        String receivedId = receivedString.split(",")[0].replace("[","");
+        double receivedLatitude = Double.parseDouble(receivedString.split(",")[1].replace(" ",""));
+        double receivedLongitude = Double.parseDouble(receivedString.split(",")[2].replace(" ",""));
+        int receivedCount = Integer.parseInt(receivedString.split(",")[3].replace("]","").replace(" ",""));
         return new LatLng(receivedLatitude, receivedLongitude);
     }
 
+    private class InfoParser{
+        String receivedString;
+
+        InfoParser(String pString){
+            this.receivedString=pString;
+        }
+
+        String getId(){
+            return receivedString.split(",")[0].replace("[","");
+        }
+
+        LatLng getLatLng(){
+            double receivedLatitude = Double.parseDouble(receivedString.split(",")[1].replace(" ",""));
+            double receivedLongitude = Double.parseDouble(receivedString.split(",")[2].replace(" ",""));
+            return new LatLng(receivedLatitude, receivedLongitude);
+        }
+        int getCount(){
+            return Integer.parseInt(receivedString.split(",")[3].replace("]","").replace(" ",""));
+        }
+
+    }
     @Override
     public void onLocationChanged(Location location) {
 

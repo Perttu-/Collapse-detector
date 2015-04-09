@@ -3,21 +3,21 @@ package com.aware.plugin.collapse_detector;
 
 public class CollapseInfo {
     Long timestamp;
-    String coordinates;
+    String info;
 
     public CollapseInfo(){}
 
     public CollapseInfo(Long timestamp, String coordinate){
         this.timestamp = timestamp;
-        this.coordinates = coordinate;
+        this.info = coordinate;
     }
     //Setters
     public void setTimestamp(Long pTimestamp){
         this.timestamp = pTimestamp;
     }
 
-    public void setCoordinates(String pCoordinates){
-        this.coordinates = pCoordinates;
+    public void setInfo(String pCoordinates){
+        this.info = pCoordinates;
     }
 
     //Getters
@@ -25,8 +25,8 @@ public class CollapseInfo {
         return this.timestamp;
     }
 
-    public String getCoordinates(){
-        return this.coordinates;
+    public String getInfo(){
+        return this.info;
     }
 
 }

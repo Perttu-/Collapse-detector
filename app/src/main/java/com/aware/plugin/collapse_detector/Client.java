@@ -70,11 +70,11 @@ public class Client implements Runnable {
             final JSONObject id_json = new JSONObject();
 
             //expecting to receive string of size 32
-            byte[] buf = new byte[32];
+            byte[] buf = new byte[32]; //fix this
             final DatagramPacket packet = new DatagramPacket(buf, buf.length, serverAddr, UDP_SERVER_PORT);
 
 
-            //using timer to check the if packet was received and also parsing the string
+            //using timer to check the if packet was received
             TimerTask receivingTask = new TimerTask() {
                 @Override
                 public void run() {
@@ -87,7 +87,7 @@ public class Client implements Runnable {
                             Toast.makeText(context, "Received: "+receivedString, Toast.LENGTH_SHORT).show();
 
                             final Long timestamp = System.currentTimeMillis();
-                            //saves the received encrypted data and its time of arrival to database
+                            //saves the received data and its time of arrival to database
                             db.addCollapse(new CollapseInfo(timestamp, receivedString));
 
                         } catch (Exception e) {
@@ -153,6 +153,7 @@ public class Client implements Runnable {
                     Log.d("test", "LOCATION: lat: "+sLatitude+" long: "+sLongitude);
                     double latitude = Double.parseDouble(sLatitude);
                     double longitude = Double.parseDouble(sLongitude);
+                    gps_data.close();
 
                     final Long timestamp = System.currentTimeMillis();
                     fall_json.put("timestamp", timestamp);
