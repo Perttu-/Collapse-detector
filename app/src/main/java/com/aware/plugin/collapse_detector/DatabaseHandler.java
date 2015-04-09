@@ -17,7 +17,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String DATABASE_NAME ="collapseDatabase";
     private static final String TABLE_COLLAPSES ="collapses";
     private static final String KEY_TIMESTAMP = "timestamp";
-    private static final String INFO = "info";
+    private static final String COORDINATES = "coordinates";
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -26,7 +26,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String CREATE_CONTACTS_TABLE = "CREATE TABLE " + TABLE_COLLAPSES + "("
-                + KEY_TIMESTAMP + " INTEGER PRIMARY KEY," + INFO + " TEXT"+ ")";
+                + KEY_TIMESTAMP + " INTEGER PRIMARY KEY," + COORDINATES+ " TEXT"+ ")";
         db.execSQL(CREATE_CONTACTS_TABLE);
     }
 
@@ -42,7 +42,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(KEY_TIMESTAMP, collapse.getTimestamp());
-        values.put(INFO, collapse.getInfo());
+        values.put(COORDINATES, collapse.getInfo());
         db.insert(TABLE_COLLAPSES, null, values);
         Log.d("DATABASE", "Added.");
         db.close();
@@ -50,7 +50,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public CollapseInfo getCollapse(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_COLLAPSES, new String[] {KEY_TIMESTAMP, INFO},KEY_TIMESTAMP + "=?",
+        Cursor cursor = db.query(TABLE_COLLAPSES, new String[] {KEY_TIMESTAMP, COORDINATES},KEY_TIMESTAMP + "=?",
                 new String[]{String.valueOf(id)},null,null,null,null);
         if(cursor != null){
             cursor.moveToFirst();
@@ -89,7 +89,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(KEY_TIMESTAMP, collapse.getTimestamp());
-        values.put(INFO, collapse.getInfo());
+        values.put(COORDINATES, collapse.getInfo());
         return db.update(TABLE_COLLAPSES, values, KEY_TIMESTAMP + " =?",new String[] {String.valueOf(collapse.getTimestamp())});
     }
 

@@ -143,12 +143,12 @@ public class MapScreen extends FragmentActivity implements LocationListener {
         }
 
         LatLng getLatLng(){
-            double receivedLatitude = Double.parseDouble(receivedString.split(",")[1].replace(" ",""));
-            double receivedLongitude = Double.parseDouble(receivedString.split(",")[2].replace(" ",""));
+            double receivedLatitude = Double.parseDouble(receivedString.split(",")[1].replace(" ","").replace("\"",""));
+            double receivedLongitude = Double.parseDouble(receivedString.split(",")[2].replace(" ","").replace("\"",""));
             return new LatLng(receivedLatitude, receivedLongitude);
         }
         int getCount(){
-            return Integer.parseInt(receivedString.split(",")[3].replace("]","").replace(" ",""));
+            return Integer.parseInt(receivedString.split(",")[3].replace("]","").replace(" ","").replace("\"",""));
         }
 
     }

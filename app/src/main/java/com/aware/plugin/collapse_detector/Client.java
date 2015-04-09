@@ -70,7 +70,7 @@ public class Client implements Runnable {
             final JSONObject id_json = new JSONObject();
 
             //expecting to receive string of size 32
-            byte[] buf = new byte[32]; //fix this
+            byte[] buf = new byte[47]; //fix this
             final DatagramPacket packet = new DatagramPacket(buf, buf.length, serverAddr, UDP_SERVER_PORT);
 
 
@@ -84,7 +84,7 @@ public class Client implements Runnable {
                             socket.receive(packet);
                             String receivedString = new String(packet.getData());
                             Log.d("UDP", "C: Received: '" + receivedString + "'");
-                            Toast.makeText(context, "Received: "+receivedString, Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(context, "Received: "+receivedString, Toast.LENGTH_SHORT).show();
 
                             final Long timestamp = System.currentTimeMillis();
                             //saves the received data and its time of arrival to database
