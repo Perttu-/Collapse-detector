@@ -5,4 +5,17 @@
         android:defaultValue="false"
         android:persistent="true"
         android:summary="Activate/Deactivate collapse_detector plugin" />
+
+    <ListPreference
+        android:defaultValue="0"
+        android:title="Accelerometer delay"
+        android:key="accelerometer_delay_plugin_collapse_detector"
+        android:persistent="true"
+        android:entries="@array/accelerometer_delays_labels"
+        android:entryValues="@array/accelerometer_delays_values"/>
+
+    <EditTextPreference
+        android:key="threshold"
+        android:summary="Enter threshold (Example 0.3)"
+        android:title="Threshold" />
 </PreferenceScreen>

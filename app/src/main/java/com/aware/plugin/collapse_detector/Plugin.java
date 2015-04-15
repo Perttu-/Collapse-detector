@@ -8,11 +8,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -39,19 +41,46 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
     public boolean monitoring = true;
     boolean run = true;
 
+    double threshold= 0.3;
+
+
+
     @Override
     public void onCreate() {
+
         super.onCreate();
-
-        Toast.makeText(getApplicationContext(),"Monitoring Started", Toast.LENGTH_SHORT).show();
-
         TAG = "collapse_detector";
+
+        //getting preferences
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String selected_frequency = prefs.getString("accelerometer_delay_plugin_collapse_detector","0");
+        int selection = Integer.parseInt(selected_frequency);
+
+        String selected_threshold = prefs.getString("threshold","0.3");
+
+        try {
+            this.threshold = Double.parseDouble(selected_threshold);
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "Error getting threshold", e);
+            e.printStackTrace();
+            this.threshold = 0.3;
+            Toast.makeText(getApplicationContext(),"Failed to get threshold from settings. Using: "+this.threshold , Toast.LENGTH_LONG).show();
+
+
+        }
+
+
+        Toast.makeText(getApplicationContext(),"Monitoring Started \n"+"Frequency level: " +selected_frequency+ ", Threshold: "+this.threshold , Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "Selected frequency: " +selected_frequency);
+
+
         DEBUG = Aware.getSetting(this, Aware_Preferences.DEBUG_FLAG).equals("true");
         if( DEBUG ) Log.d(TAG, "collapse_detector plugin running");
+
         //accelerometer on
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+        mSensorManager.registerListener(this, mAccelerometer, selection);
 
         //aware gps on
         Aware.setSetting(getApplicationContext(), Aware_Preferences.STATUS_LOCATION_GPS, true);
@@ -88,7 +117,7 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
         double vector_sum = Math.sqrt(x*x + y*y + z*z);
 
         //the acceleration is around 0.3 as its lowest when in free fall. This may depend on the phone used.
-        if (vector_sum < 0.3 ){
+        if (vector_sum < threshold ){
 
             Log.d(TAG, "Vector sum: " + vector_sum);
             notifyUser();
@@ -139,8 +168,6 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
                         intent2 = new Intent(getApplicationContext(),InfoPanel.class);
                         intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent2);
-
-
                     }
                     if (esm_answers != null && !esm_answers.isClosed()) esm_answers.close();
                 }
@@ -152,7 +179,6 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
 
         unregisterReceiver(esm_statuses);
         Aware.setSetting(getApplicationContext(), Aware_Preferences.STATUS_ESM, false);

@@ -41,13 +41,14 @@ public class DebugFragment extends Fragment {
 
         addButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View rootView) {
-                DatabaseHandler db = new DatabaseHandler(getActivity());
-                db.addCollapse(new CollapseInfo(1428238890000L,"[65.058113, 25.456262]"));
-                db.addCollapse(new CollapseInfo(1428248890000L,"[65.051271, 25.438924]"));
-                db.addCollapse(new CollapseInfo(1428258890000L,"[65.048248, 25.470167]"));
-                db.addCollapse(new CollapseInfo(1428268890000L,"[65.037519, 25.459288]"));
-
-                Toast.makeText(getActivity(), "Added sample data to database.", Toast.LENGTH_SHORT).show();
+//                DatabaseHandler db = new DatabaseHandler(getActivity());
+//                db.addCollapse(new CollapseInfo(1428238890000L,"[65.058113, 25.456262]"));
+//                db.addCollapse(new CollapseInfo(1428248890000L,"[65.051271, 25.438924]"));
+//                db.addCollapse(new CollapseInfo(1428258890000L,"[65.048248, 25.470167]"));
+//                db.addCollapse(new CollapseInfo(1428268890000L,"[65.037519, 25.459288]"));
+//
+//                Toast.makeText(getActivity(), "Added sample data to database.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Adding disabled", Toast.LENGTH_SHORT).show();
             }
         });
 

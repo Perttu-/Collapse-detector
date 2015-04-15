@@ -24,7 +24,7 @@ import java.util.List;
 
 
 
-public class MapScreen extends FragmentActivity implements LocationListener {
+public class MapScreen extends FragmentActivity {
 
     GoogleMap googleMap;
     String TAG = "collapse_detector";
@@ -93,7 +93,8 @@ public class MapScreen extends FragmentActivity implements LocationListener {
                 marker = googleMap.addMarker(new MarkerOptions()
                         .position(collapseLocation)
                         .title("Building collapse")
-                        .snippet("Date: " + date + "\n Id: " + id + "\n Fall count: "+count ));//not tested
+                        .snippet("Date: " + date ));
+
             }
 
         }
@@ -121,15 +122,15 @@ public class MapScreen extends FragmentActivity implements LocationListener {
 //        }
 //    }
 
-        //not tested
-    public LatLng parseInfo(String receivedString){
-        //extracting all the info from the string
-        String receivedId = receivedString.split(",")[0].replace("[","");
-        double receivedLatitude = Double.parseDouble(receivedString.split(",")[1].replace(" ",""));
-        double receivedLongitude = Double.parseDouble(receivedString.split(",")[2].replace(" ",""));
-        int receivedCount = Integer.parseInt(receivedString.split(",")[3].replace("]","").replace(" ",""));
-        return new LatLng(receivedLatitude, receivedLongitude);
-    }
+//        //not tested
+//    public LatLng parseInfo(String receivedString){
+//        //extracting all the info from the string
+//        String receivedId = receivedString.split(",")[0].replace("[","");
+//        double receivedLatitude = Double.parseDouble(receivedString.split(",")[1].replace(" ",""));
+//        double receivedLongitude = Double.parseDouble(receivedString.split(",")[2].replace(" ",""));
+//        int receivedCount = Integer.parseInt(receivedString.split(",")[3].replace("]","").replace(" ",""));
+//        return new LatLng(receivedLatitude, receivedLongitude);
+//    }
 
     private class InfoParser{
         String receivedString;
@@ -151,23 +152,6 @@ public class MapScreen extends FragmentActivity implements LocationListener {
             return Integer.parseInt(receivedString.split(",")[3].replace("]","").replace(" ","").replace("\"",""));
         }
 
-    }
-    @Override
-    public void onLocationChanged(Location location) {
-
-//        if (marker != null)
-//            marker.remove();
-//
-//        double latitude = location.getLatitude();
-//        double longitude = location.getLongitude();
-//        Log.d(TAG, "Latitude: " + latitude + ", Longitude: " + longitude);
-//        LatLng latLng = new LatLng(latitude, longitude);
-//        marker = googleMap.addMarker(new MarkerOptions().position(latLng));
-//        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,10));
-//
-//        // to get the address
-//        LocationAddress locationAddress = new LocationAddress();
-//        locationAddress.getAddressFromLocation(latitude, longitude, getApplicationContext(), new GeocoderHandler());
     }
 
 
@@ -204,19 +188,4 @@ public class MapScreen extends FragmentActivity implements LocationListener {
     }
 
 
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-
-    }
 }
