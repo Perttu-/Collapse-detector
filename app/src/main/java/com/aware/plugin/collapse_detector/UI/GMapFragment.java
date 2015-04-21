@@ -1,4 +1,4 @@
-package com.aware.plugin.collapse_detector;
+package com.aware.plugin.collapse_detector.UI;
 
 
 
@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 
+import com.aware.plugin.collapse_detector.R;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;

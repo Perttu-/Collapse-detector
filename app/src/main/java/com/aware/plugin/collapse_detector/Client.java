@@ -111,6 +111,9 @@ public class Client implements Runnable {
                 public void run() {
                     if (run) {
                         try {
+                            //not yet tested
+//                            String encDevice_id=AES.encrypt(device_id);
+//                            id_json.put("device id", encDevice_id);
                             id_json.put("device id", device_id);
                             send(socket, id_json, serverAddr);
 

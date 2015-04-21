@@ -1,26 +1,28 @@
-package com.aware.plugin.collapse_detector;
+package com.aware.plugin.collapse_detector.UI;
 
 import android.database.Cursor;
-import android.location.Location;
-import android.location.LocationListener;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentActivity;
+
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+
+import com.aware.plugin.collapse_detector.AES;
+import com.aware.plugin.collapse_detector.DatabaseHandler;
+import com.aware.plugin.collapse_detector.R;
 import com.aware.providers.Locations_Provider;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import java.text.SimpleDateFormat;
 
-import java.util.List;
+
 
 
 
@@ -58,6 +60,7 @@ public class MapScreen extends FragmentActivity {
 //        double latitude = location.getLatitude();
 //        double longitude = location.getLongitude();
 
+        //get location data from aware database
         String [] selections = new String[2];
         selections[0] = "double_latitude";
         selections[1] = "double_longitude";
@@ -70,67 +73,40 @@ public class MapScreen extends FragmentActivity {
         double longitude = Double.parseDouble(sLongitude);
         gps_data.close();
         LatLng myLocation = new LatLng(latitude, longitude);
-
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation,10));
 
+        // testing encryption & decryption
+        String test= "qwertyuiopoasdfghjk";
+        String enc= AES.encrypt(test);
+        Log.d("test", "ENCRYPTED "+enc);
+        String dec = AES.decrypt(enc);
+        Log.d("test", "DECRYPTED "+dec);
 
-        List<CollapseInfo> collapses = db.getAllCollapses();
-        for (CollapseInfo ci : collapses) {
-            String info = ci.getInfo();
-            Long timestamp = ci.getTimestamp();
-            SimpleDateFormat sdf = new SimpleDateFormat("MM.dd.yyyy HH:mm ");
-            String date = sdf.format(timestamp);
-
-            //this if statement is just a workaround to ignore encrypted data
-            if (info.charAt(0) == '[') {
-
-                String collapseDecrypted = info;
-                //LatLng collapseLocation = parseInfo(collapseDecrypted);
-                InfoParser ip = new InfoParser(collapseDecrypted);
-                LatLng collapseLocation = ip.getLatLng();
-                String id = ip.getId();
-                int count = ip.getCount();
-                marker = googleMap.addMarker(new MarkerOptions()
-                        .position(collapseLocation)
-                        .title("Building collapse")
-                        .snippet("Date: " + date ));
-
-            }
-
-        }
-    }
-
-
-
-//    public byte[] decrypt(String encString){
-//        Log.d("DECRYPTING", "Encrypted: '"+ encString + "'");
-//        String key = "0123456789abcdef";
-//        byte[] encBytes = encString.getBytes();
-//        byte[] b_EncString =encString.getBytes();
-//        try {
+//        List<CollapseInfo> collapses = db.getAllCollapses();
+//        for (CollapseInfo ci : collapses) {
+//            String info = ci.getInfo();
+//            Long timestamp = ci.getTimestamp();
+//            SimpleDateFormat sdf = new SimpleDateFormat("MM.dd.yyyy HH:mm ");
+//            String date = sdf.format(timestamp);
 //
-//            // Get a cipher object.
-//            Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
-//            cipher.init(Cipher.DECRYPT_MODE, key);
-//            byte[] decryptedBytes = cipher.doFinal(cipherBytes);
-//            String decryptedText = new String(decryptedBytes, "UTF8");
+//            //this if statement is just a workaround to ignore encrypted data
+//            if (info.charAt(0) == '[') {
 //
-//        }catch (Exception e) {
-//            Log.e("DECRYPTING", "Error decrypting data", e);
-//            e.printStackTrace();
-//            return null;
+//                String collapseDecrypted = info;
+//                //LatLng collapseLocation = parseInfo(collapseDecrypted);
+//                InfoParser ip = new InfoParser(collapseDecrypted);
+//                LatLng collapseLocation = ip.getLatLng();
+//                String id = ip.getId();
+//                int count = ip.getCount();
+//                marker = googleMap.addMarker(new MarkerOptions()
+//                        .position(collapseLocation)
+//                        .title("Building collapse")
+//                        .snippet("Date: " + date ));
+//
+//            }
+//
 //        }
-//    }
-
-//        //not tested
-//    public LatLng parseInfo(String receivedString){
-//        //extracting all the info from the string
-//        String receivedId = receivedString.split(",")[0].replace("[","");
-//        double receivedLatitude = Double.parseDouble(receivedString.split(",")[1].replace(" ",""));
-//        double receivedLongitude = Double.parseDouble(receivedString.split(",")[2].replace(" ",""));
-//        int receivedCount = Integer.parseInt(receivedString.split(",")[3].replace("]","").replace(" ",""));
-//        return new LatLng(receivedLatitude, receivedLongitude);
-//    }
+    }
 
     private class InfoParser{
         String receivedString;

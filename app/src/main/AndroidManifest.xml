@@ -38,7 +38,7 @@
             android:exported="true" />
 
         <activity
-            android:name=".MapScreen"
+            android:name=".UI.MapScreen"
             android:label="@string/title_activity_homescreen" >
         </activity>
 
@@ -47,7 +47,7 @@
             android:value="AIzaSyDk3nx26wd0TrHszRY_RY7zYkpW_HvOQAg" />
 
         <activity
-            android:name=".InfoPanel"
+            android:name=".UI.InfoPanel"
             android:label="@string/title_activity_info" >
 
             <intent-filter>

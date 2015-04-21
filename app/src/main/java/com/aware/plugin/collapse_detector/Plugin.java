@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.aware.Aware;
 import com.aware.Aware_Preferences;
 import com.aware.ESM;
+import com.aware.plugin.collapse_detector.UI.InfoPanel;
 import com.aware.providers.ESM_Provider;
 import com.aware.utils.Aware_Plugin;
 

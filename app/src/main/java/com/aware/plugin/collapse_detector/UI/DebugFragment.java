@@ -1,4 +1,4 @@
-package com.aware.plugin.collapse_detector;
+package com.aware.plugin.collapse_detector.UI;
 
 
 import android.os.Bundle;
@@ -8,6 +8,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
+
+import com.aware.plugin.collapse_detector.CollapseInfo;
+import com.aware.plugin.collapse_detector.DatabaseHandler;
+import com.aware.plugin.collapse_detector.R;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.aware.plugin.collapse_detector;
+package com.aware.plugin.collapse_detector.UI;
 
 
 import android.content.Intent;
@@ -19,6 +19,10 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import com.aware.plugin.collapse_detector.CollapseInfo;
+import com.aware.plugin.collapse_detector.DatabaseHandler;
+import com.aware.plugin.collapse_detector.R;
 
 import java.util.List;
 
