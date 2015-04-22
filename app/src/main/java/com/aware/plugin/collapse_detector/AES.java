@@ -20,8 +20,9 @@ public class AES {
             c.init(Cipher.ENCRYPT_MODE, key);
             //padding string with '{' to be divisible by 16
             int padAmount=(blockSize - data.length() % blockSize);
-            String padding = new String(new char[padAmount]).replace('\0', '{');
+            String padding = new String(new char[padAmount]).replace('\0', '!');
             data += padding;
+            Log.d("AES ","DATA "+data );
             //encoding and encrypting
             byte[] encryptedValue = c.doFinal(data.getBytes());
             byte[] encodedValue = Base64.encode(encryptedValue, Base64.DEFAULT);

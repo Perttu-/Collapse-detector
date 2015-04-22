@@ -112,9 +112,9 @@ public class Client implements Runnable {
                     if (run) {
                         try {
                             //not yet tested
-//                            String encDevice_id=AES.encrypt(device_id);
-//                            id_json.put("device id", encDevice_id);
+
                             id_json.put("device id", device_id);
+
                             send(socket, id_json, serverAddr);
 
                         } catch (Exception e) {
@@ -187,7 +187,11 @@ public class Client implements Runnable {
     public void send(DatagramSocket socket, JSONObject jsonObj, InetAddress serverAddr) {
 
         try {
-            //Prepare some data to be sent
+            //Encrypt and prepare data to be sent
+//            String stringJson = jsonObj.toString();
+//            String encJson = AES.encrypt(stringJson);
+//            byte[] buf = encJson.getBytes();
+
             byte[] buf = jsonObj.toString().getBytes();
 
             //Create UDP-packet with data & destination(url+port)
