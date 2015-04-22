@@ -7,17 +7,17 @@ public class CollapseInfo {
 
     public CollapseInfo(){}
 
-    public CollapseInfo(Long timestamp, String coordinate){
+    public CollapseInfo(Long timestamp, String info){
         this.timestamp = timestamp;
-        this.info = coordinate;
+        this.info = info;
     }
     //Setters
     public void setTimestamp(Long pTimestamp){
         this.timestamp = pTimestamp;
     }
 
-    public void setInfo(String pCoordinates){
-        this.info = pCoordinates;
+    public void setInfo(String pInfo){
+        this.info = pInfo;
     }
 
     //Getters
