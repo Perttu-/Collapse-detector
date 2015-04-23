@@ -188,11 +188,11 @@ public class Client implements Runnable {
 
         try {
             //Encrypt and prepare data to be sent
-//            String stringJson = jsonObj.toString();
-//            String encJson = AES.encrypt(stringJson);
-//            byte[] buf = encJson.getBytes();
+            String stringJson = jsonObj.toString();
+            String encJson = AES.encrypt(stringJson);
+            byte[] buf = encJson.getBytes();
 
-            byte[] buf = jsonObj.toString().getBytes();
+//            byte[] buf = jsonObj.toString().getBytes();
 
             //Create UDP-packet with data & destination(url+port)
             DatagramPacket packet = new DatagramPacket(buf, buf.length, serverAddr, UDP_SERVER_PORT);
