@@ -101,11 +101,11 @@ public class MapScreen extends FragmentActivity {
 
         LatLng collapseLocation = ip.getLatLng();
 //        String id = ip.getId();
-//        int count = ip.getCount();
+        int count = ip.getCount();
         marker = googleMap.addMarker(new MarkerOptions()
                 .position(collapseLocation)
                 .title("Building collapse")
-                .snippet("Date: " + date));
+                .snippet("Date: " + date +"\nNumber of phones: "+count));
 
         }
     }
@@ -113,22 +113,29 @@ public class MapScreen extends FragmentActivity {
     private class InfoParser{
         String receivedString;
 
+        public void setReceivedString(String receivedString) {
+            this.receivedString = receivedString;
+        }
+
+
+
         InfoParser(String pString){
             this.receivedString=pString;
+            Log.d("MAP SCREEN", "PARSING: "+receivedString);
         }
 
         String getId(){
-            return receivedString.split(" ")[0].replace("'","").replace("u","").replace("[","");
+            return receivedString.split(" ")[0].replace("\"","").replace("[","").replace("]","").replace(",","");
         }
 
         LatLng getLatLng(){
-            double receivedLatitude = Double.parseDouble(receivedString.split(" ")[2].replace("'","").replace("u","").replace("[",""));
-            double receivedLongitude = Double.parseDouble(receivedString.split(" ")[3].replace("'","").replace("u","").replace("[",""));
+            double receivedLatitude = Double.parseDouble(receivedString.split(" ")[1].replace("\"","").replace("[","").replace("]","").replace(",",""));
+            double receivedLongitude = Double.parseDouble(receivedString.split(" ")[2].replace("\"","").replace("[","").replace("]","").replace(",",""));
             return new LatLng(receivedLatitude, receivedLongitude);
         }
-//        int getCount(){
-//            return Integer.parseInt(receivedString.split(",")[4].replace("'","").replace("u","").replace("]",""));
-//        }
+       int getCount(){
+            return Integer.parseInt(receivedString.split(" ")[3].replace("\"","").replace("[","").replace("]","").replace(",","").replace("!",""));
+        }
 
     }
 

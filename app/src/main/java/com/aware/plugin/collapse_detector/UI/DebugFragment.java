@@ -47,8 +47,8 @@ public class DebugFragment extends Fragment {
         addButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View rootView) {
                 DatabaseHandler db = new DatabaseHandler(getActivity());
-                db.addCollapse(new CollapseInfo(1428238890000L, AES.encrypt("[u'111111111111111' u'1428238890000' u'65.048248' u'25.470167' u'2' u'1']")));
-                db.addCollapse(new CollapseInfo(1428248890000L, AES.encrypt("[u'111111111111111' u'1428238890000' u'65.037519' u'25.456262' u'2' u'1']")));
+                db.addCollapse(new CollapseInfo(1428238890000L, AES.encrypt("[[\"111111111111111\", \"65.0513\", \"25.4614\", \"1\"]]")));
+                db.addCollapse(new CollapseInfo(1428248890000L, AES.encrypt("[[\"111111111111112\", \"65.0633\", \"25.4714\", \"1\"]]")));
 
                 Toast.makeText(getActivity(), "Added sample data to database.", Toast.LENGTH_SHORT).show();
 
