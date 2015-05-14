@@ -97,6 +97,7 @@ public class Client extends BroadcastReceiver implements Runnable {
 
                 try {
                     final JSONObject msg_json = new JSONObject();
+                    msg_json.put("tag", "message");
                     msg_json.put("message", ans);
                     Log.d("Client", "Sending message");
 
@@ -172,7 +173,7 @@ public class Client extends BroadcastReceiver implements Runnable {
                 public void run() {
                     if (run) {
                         try {
-
+                            id_json.put("tag", "id");
                             id_json.put("device id", device_id);
                             Log.d("Client", "Sending id");
                            send(socket, id_json, serverAddr);
@@ -207,6 +208,7 @@ public class Client extends BroadcastReceiver implements Runnable {
                     gps_data.close();
 
                     final Long timestamp = System.currentTimeMillis();
+                    fall_json.put("tag", "fall");
                     fall_json.put("timestamp", timestamp);
                     fall_json.put("latitude", latitude);
                     fall_json.put("longitude", longitude);
