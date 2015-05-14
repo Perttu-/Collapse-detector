@@ -1,8 +1,5 @@
 package com.aware.plugin.collapse_detector;
 
-/**
- * Created by pratyush on 16/02/15.
- */
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -15,12 +12,11 @@ public class PopUp extends IntentService {
     private static String Q;
 
     void initialize() {
-
         Q = "{'esm':{" +
-                "'esm_type':" + ESM.TYPE_ESM_QUICK_ANSWERS + "," +
-                "'esm_title': 'Fall Detected (Yes/No)'," +
-                "'esm_instructions': 'Did you or your phone fell down?'," +
-                "'esm_quick_answers': ['No','Yes']," +
+                "'esm_type': 1," +
+                "'esm_title': 'Fall detected'," +
+                "'esm_instructions': 'The plugin detected a fall. Can you elaborate why did this happen?'," +
+                "'esm_submit': 'Send'," +
                 "'esm_expiration_threashold': 1200," +
                 "'esm_trigger': ''" +
                 "}}";

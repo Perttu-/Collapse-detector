@@ -25,7 +25,7 @@ import com.aware.plugin.collapse_detector.UI.InfoPanel;
 import com.aware.providers.ESM_Provider;
 import com.aware.utils.Aware_Plugin;
 
-
+import java.util.ArrayList;
 
 
 public class Plugin extends Aware_Plugin implements SensorEventListener {
@@ -33,16 +33,15 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
     private static SensorManager mSensorManager = null;
     private static Sensor mAccelerometer = null;
 
-    private  final ESMStatusListener esm_statuses = new ESMStatusListener();
     public static Intent intent2;
-    boolean fall = false;
 
     Client client = null;
 
     public boolean monitoring = true;
     boolean run = true;
 
-    double threshold= 0.3;
+    //default threshold value
+    double threshold = 0.3;
 
 
 
@@ -93,11 +92,12 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
         IntentFilter esm_filter = new IntentFilter();
         esm_filter.addAction(ESM.ACTION_AWARE_ESM_ANSWERED);
         esm_filter.addAction(ESM.ACTION_AWARE_ESM_DISMISSED);
-        registerReceiver(esm_statuses, esm_filter);
+
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
 
         client = new Client(this);
         new Thread(client).start();
+        registerReceiver(client, esm_filter);
 
 
     }
@@ -117,12 +117,15 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
 
         double vector_sum = Math.sqrt(x*x + y*y + z*z);
 
-        //the acceleration is around 0.3 as its lowest when in free fall. This may depend on the phone used.
+        //the acceleration is around 0.3 as its lowest when in free fall. Threshold may depend on the phone used.
         if (vector_sum < threshold ){
+            ArrayList<Double> sums = new ArrayList<>();
+            sums.add(vector_sum);
 
             Log.d(TAG, "Vector sum: " + vector_sum);
             notifyUser();
-            fall = true;
+
+            client.setAcc(vector_sum);
             client.setFall(true);
 
         }
@@ -133,9 +136,9 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
         mBuilder.setSmallIcon(R.drawable.ic_launcher);
         mBuilder.setContentTitle("Phone fall detected");
-        mBuilder.setContentText("Please confirm");
+        mBuilder.setContentText("Please elaborate");
 
-        int mNotificationId = 001;
+        int mNotificationId = 1;
         Intent intent1 = new Intent(this, PopUp.class);
 
         PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 999, intent1, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -144,44 +147,15 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
         NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mNotifyMgr.notify(mNotificationId, mBuilder.build());
 
-
     }
 
-    public class ESMStatusListener extends BroadcastReceiver {
-        public void onReceive(Context context, Intent intent) {
-
-            if (intent.getAction().equals(ESM.ACTION_AWARE_ESM_DISMISSED))
-                Log.d(TAG, "Pop Up was dismissed");
-
-            if (intent.getAction().equals(ESM.ACTION_AWARE_ESM_ANSWERED)) {
-
-                Log.d(TAG, "Pop Up was answered");
-                Cursor esm_answers = context.getContentResolver().query(ESM_Provider.ESM_Data.CONTENT_URI, null, null, null, null);
-                if (esm_answers != null && esm_answers.moveToLast()) {
-                    String ans = esm_answers.getString(esm_answers.getColumnIndex(ESM_Provider.ESM_Data.ANSWER));
-
-                    Log.d(TAG, "User answer ----- " + ans);
-
-                    if (ans.equalsIgnoreCase("Yes")) {
-                        Log.d(TAG, "answer is yes, mapScreen shows up");
-
-                        //shows ui for map and other information
-                        intent2 = new Intent(getApplicationContext(),InfoPanel.class);
-                        intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent2);
-                    }
-                    if (esm_answers != null && !esm_answers.isClosed()) esm_answers.close();
-                }
-            }
-        }
-    }
 
 
     @Override
     public void onDestroy() {
         super.onDestroy();
 
-        unregisterReceiver(esm_statuses);
+        unregisterReceiver(client);
         Aware.setSetting(getApplicationContext(), Aware_Preferences.STATUS_ESM, false);
         if( DEBUG ) Log.d(TAG, "collapse_detector plugin terminated");
         mSensorManager.unregisterListener(this, mAccelerometer);
@@ -189,7 +163,6 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
         Aware.setSetting(getApplicationContext(), Aware_Preferences.STATUS_LOCATION_GPS, false);
         Intent activate_gps = new Intent(Aware.ACTION_AWARE_REFRESH);
         sendBroadcast(activate_gps);
-
 
         monitoring = false;
         run=false;
