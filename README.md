@@ -15,10 +15,11 @@ Completed features:
 - Saves received collapse locations to SQLite database
 - Gets the collapse locations from database and displays them on map.
 - Debug panel where database can be cleared and filled with sample coordinates.
+- Encrypting and decrypting with 128 bit AES
+- Asks user question how the phone detected a fall
 
 To do:
-- Decryption
-- Implement better way to get user location (getlastlocation sometimes returns null).
+- Implement better way to get user location (getlastlocation returns null with some devices).
 - Warn user when new collapses are received.
 - More text and pictures to first aid and safety fragments.
 - Change the map activity to fragment.
