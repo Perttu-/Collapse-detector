@@ -43,7 +43,6 @@ public class Receiver implements Runnable {
                     try {
                         socket.receive(packet);
                         String receivedString = new String(packet.getData());
-                        System.out.println(receivedString);
                         Log.d("UDP", "C: Received: '" + receivedString + "'");
 
                         final Long timestamp = System.currentTimeMillis();
@@ -53,8 +52,6 @@ public class Receiver implements Runnable {
 
                     } catch (SocketTimeoutException e) {
                         // timeout exception.
-                        Log.d("UDP", "Timeout reached");
-
                     }
                 }
 

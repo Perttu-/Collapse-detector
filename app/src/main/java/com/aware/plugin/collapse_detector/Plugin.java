@@ -105,8 +105,9 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
             new Thread(sender).start();
             registerReceiver(sender, esm_filter);
 
-            Thread receiver = new Thread(new Receiver(this, socket, serverAddr, UDP_SERVER_PORT));
-            receiver.start();
+            receiver = new Receiver(this, socket, serverAddr, UDP_SERVER_PORT);
+            new Thread (receiver).start();
+            receiver.setRun(true);
 
         } catch(Exception e){
             Log.e("Client", "Error connecting", e);

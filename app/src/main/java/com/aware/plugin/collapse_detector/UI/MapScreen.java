@@ -93,13 +93,13 @@ public class MapScreen extends FragmentActivity {
             SimpleDateFormat sdf = new SimpleDateFormat("MM.dd.yyyy HH:mm ");
             String date = sdf.format(timestamp);
 
-
-
         String collapseDecrypted = AES.decrypt(info);
         InfoParser ip = new InfoParser(collapseDecrypted);
 
+       // InfoParser ip = new InfoParser(info);
+
         LatLng collapseLocation = ip.getLatLng();
-//        String id = ip.getId();
+
         int count = ip.getCount();
         marker = googleMap.addMarker(new MarkerOptions()
                 .position(collapseLocation)
@@ -111,7 +111,7 @@ public class MapScreen extends FragmentActivity {
 
     private class InfoParser{
         String receivedString;
-
+        String removed = "[\"\\[\\],!\\u0000-\\u001f]";
         public void setReceivedString(String receivedString) {
             this.receivedString = receivedString;
         }
@@ -122,18 +122,19 @@ public class MapScreen extends FragmentActivity {
         }
 
         String getId(){
-            return receivedString.split(" ")[0].replace("\"","").replace("[","").replace("]","").replace(",","");
+
+            return receivedString.split(" ")[0].replaceAll(removed,"");
         }
 
         LatLng getLatLng(){
 
 
-            double receivedLatitude = Double.parseDouble(receivedString.split(" ")[1].replace("\"","").replace("[","").replace("]","").replace(",",""));
-            double receivedLongitude = Double.parseDouble(receivedString.split(" ")[2].replace("\"","").replace("[","").replace("]","").replace(",",""));
+            double receivedLatitude = Double.parseDouble(receivedString.split(" ")[1].replaceAll(removed, ""));
+            double receivedLongitude = Double.parseDouble(receivedString.split(" ")[2].replaceAll(removed, ""));
             return new LatLng(receivedLatitude, receivedLongitude);
         }
        int getCount(){
-            return Integer.parseInt(receivedString.split(" ")[3].replace("\"","").replace("[","").replace("]","").replace(",","").replace("!",""));
+            return Integer.parseInt(receivedString.split(" ")[3].replaceAll(removed, ""));
         }
 
     }
