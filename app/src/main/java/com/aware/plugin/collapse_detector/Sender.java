@@ -17,7 +17,6 @@ import org.json.JSONObject;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -25,10 +24,7 @@ import java.util.TimerTask;
 
 
 // receiving and sending data with server
-public class Client extends BroadcastReceiver implements Runnable {
-
-    int UDP_SERVER_PORT = 80;
-    String UDP_SERVER_IP = "85.23.168.159";
+public class Sender extends BroadcastReceiver implements Runnable {
 
     LocationManager locationManager;
     TelephonyManager telephonyManager;
@@ -43,26 +39,21 @@ public class Client extends BroadcastReceiver implements Runnable {
 
     DatagramSocket socket;
     InetAddress serverAddr;
+    int udp_port;
     Double acceleration;
+    String message;
 
 
-    public Client(Context context) {
+    public Sender(Context context, DatagramSocket soc, InetAddress addr, int port) {
         this.context = context;
+        this.socket = soc;
+        this.serverAddr = addr;
+        this.udp_port = port;
+
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         db = new DatabaseHandler(context);
 
-        try {
-            // Retrieve the ServerName
-            this.serverAddr = InetAddress.getByName(UDP_SERVER_IP);
-            Log.d("UDP", "C: Connecting...");
-            //Create new UDP-Socket
-            this.socket = new DatagramSocket();
-
-        } catch(Exception e){
-            Log.e("Client", "Error connecting", e);
-            e.printStackTrace();
-        }
     }
 
     public void setFall(boolean pFall) {
@@ -71,6 +62,10 @@ public class Client extends BroadcastReceiver implements Runnable {
 
     public void setAcc(Double acc){
         this.acceleration = acc;
+    }
+
+    public void setMessage(String msg){
+        this.message = msg;
     }
 
     public void setRun(Boolean pRun) {
@@ -83,38 +78,24 @@ public class Client extends BroadcastReceiver implements Runnable {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        if (intent.getAction().equals(ESM.ACTION_AWARE_ESM_DISMISSED))
+    if (intent.getAction().equals(ESM.ACTION_AWARE_ESM_DISMISSED))
             Log.d(TAG, "Pop Up was dismissed");
 
         if (intent.getAction().equals(ESM.ACTION_AWARE_ESM_ANSWERED)) {
-
             Log.d(TAG, "Pop Up was answered");
             Cursor esm_answers = context.getContentResolver().query(ESM_Provider.ESM_Data.CONTENT_URI, null, null, null, null);
+
             if (esm_answers != null && esm_answers.moveToLast()) {
                 String ans = esm_answers.getString(esm_answers.getColumnIndex(ESM_Provider.ESM_Data.ANSWER));
-
                 Log.d(TAG, "User answer: '" + ans + "'");
-
-                try {
-                    final JSONObject msg_json = new JSONObject();
-                    msg_json.put("tag", 2);
-                    msg_json.put("message", ans);
-                    Log.d("Client", "Sending message");
-
-                    send(socket, msg_json, serverAddr);
-
-                } catch (Exception e) {
-                    Log.e("JSON", "Error in id", e);
-                    e.printStackTrace();
-                }
-
-
-
+                this.message = ans;
             }
             esm_answers.close();
         }
 
     }
+
+
 
 
     @Override
@@ -132,38 +113,40 @@ public class Client extends BroadcastReceiver implements Runnable {
 
 
             //expecting to receive string of size x
-            byte[] buf = new byte[88];
-            final DatagramPacket packet = new DatagramPacket(buf, buf.length, serverAddr, UDP_SERVER_PORT);
+//            byte[] buf = new byte[88];
+//            final DatagramPacket packet = new DatagramPacket(buf, buf.length, serverAddr, UDP_SERVER_PORT);
 
 
             //using timer to check the if packet was received
-            TimerTask receivingTask = new TimerTask() {
-                @Override
-                public void run() {
-                    if (run && !socket.isClosed()) {
+//            TimerTask receivingTask = new TimerTask() {
+//                @Override
+//                public void run() {
+//                    if (run && !socket.isClosed()) {
+//
+//                        try {
+//                            socket.receive(packet);
+//                            String receivedString = new String(packet.getData());
+//                            Log.d("UDP", "C: Received: '" + receivedString + "'");
+//                            //Toast.makeText(context, "Received: "+receivedString, Toast.LENGTH_SHORT).show();
+//
+//                            final Long timestamp = System.currentTimeMillis();
+//                            //saves the received data and its time of arrival to database
+//                            db.addCollapse(new CollapseInfo(timestamp, receivedString));
+//
+//                        } catch (Exception e) {
+//                            Log.e("UDP", "Error receiving data", e);
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                }
+//            };
 
-                        try {
-                            socket.receive(packet);
-                            String receivedString = new String(packet.getData());
-                            Log.d("UDP", "C: Received: '" + receivedString + "'");
-                            //Toast.makeText(context, "Received: "+receivedString, Toast.LENGTH_SHORT).show();
+//            Timer rTimer = new Timer();
+//            long rDelay = 0;
+//            long rIntervalPeriod = 500;
+//            rTimer.scheduleAtFixedRate(receivingTask, rDelay, rIntervalPeriod);
 
-                            final Long timestamp = System.currentTimeMillis();
-                            //saves the received data and its time of arrival to database
-                            db.addCollapse(new CollapseInfo(timestamp, receivedString));
 
-                        } catch (Exception e) {
-                            Log.e("UDP", "Error receiving data", e);
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            };
-
-            Timer rTimer = new Timer();
-            long rDelay = 0;
-            long rIntervalPeriod = 500;
-            rTimer.scheduleAtFixedRate(receivingTask, rDelay, rIntervalPeriod);
 
 
             //using timer to send device id once in a minute
@@ -227,6 +210,23 @@ public class Client extends BroadcastReceiver implements Runnable {
 
                     fall = false;
                 }
+
+                //sending the user message if its available
+                if (message != null && !message.isEmpty()){
+                    try {
+                        final JSONObject msg_json = new JSONObject();
+                        msg_json.put("tag", 2);
+                        msg_json.put("message", message);
+                        Log.d("Client", "Sending message");
+
+                        send(socket, msg_json, serverAddr);
+
+                    } catch (Exception e) {
+                        Log.e("JSON", "Error in id", e);
+                        e.printStackTrace();
+                    }
+                    message = null;
+                }
             }
 
         } catch (Exception e) {
@@ -244,10 +244,8 @@ public class Client extends BroadcastReceiver implements Runnable {
             String encJson = AES.encrypt(stringJson);
             byte[] buf = encJson.getBytes();
 
-
-
             //Create UDP-packet with data & destination(url+port)
-            DatagramPacket packet = new DatagramPacket(buf, buf.length, serverAddr, UDP_SERVER_PORT);
+            DatagramPacket packet = new DatagramPacket(buf, buf.length, serverAddr, udp_port);
             Log.d("UDP", "C: Sending: '" + new String(buf) + "'");
 
             //Send out the packet */

@@ -4,12 +4,9 @@ package com.aware.plugin.collapse_detector;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -21,10 +18,10 @@ import android.widget.Toast;
 import com.aware.Aware;
 import com.aware.Aware_Preferences;
 import com.aware.ESM;
-import com.aware.plugin.collapse_detector.UI.InfoPanel;
-import com.aware.providers.ESM_Provider;
 import com.aware.utils.Aware_Plugin;
 
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.ArrayList;
 
 
@@ -35,7 +32,8 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
 
     public static Intent intent2;
 
-    Client client = null;
+    Sender sender = null;
+    Receiver receiver = null;
 
     public boolean monitoring = true;
     boolean run = true;
@@ -65,14 +63,11 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
             e.printStackTrace();
             this.threshold = 0.3;
             Toast.makeText(getApplicationContext(),"Failed to get threshold from settings. Using: "+this.threshold , Toast.LENGTH_LONG).show();
-
-
         }
 
 
         Toast.makeText(getApplicationContext(),"Monitoring Started \n"+"Frequency level: " +selected_frequency+ ", Threshold: "+this.threshold , Toast.LENGTH_SHORT).show();
         Log.d(TAG, "Selected frequency: " +selected_frequency);
-
 
         DEBUG = Aware.getSetting(this, Aware_Preferences.DEBUG_FLAG).equals("true");
         if( DEBUG ) Log.d(TAG, "collapse_detector plugin running");
@@ -92,13 +87,31 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
         IntentFilter esm_filter = new IntentFilter();
         esm_filter.addAction(ESM.ACTION_AWARE_ESM_ANSWERED);
         esm_filter.addAction(ESM.ACTION_AWARE_ESM_DISMISSED);
-
         sendBroadcast(new Intent(Aware.ACTION_AWARE_REFRESH));
 
-        client = new Client(this);
-        new Thread(client).start();
-        registerReceiver(client, esm_filter);
 
+        //connecting and starting threads
+        int UDP_SERVER_PORT = 80;
+        String UDP_SERVER_IP = "85.23.168.159";
+
+        try {
+            // Retrieve the ServerName
+            InetAddress serverAddr = InetAddress.getByName(UDP_SERVER_IP);
+            Log.d("UDP", "C: Connecting...");
+            //Create new UDP-Socket
+            DatagramSocket socket = new DatagramSocket();
+
+            sender = new Sender(this, socket, serverAddr,UDP_SERVER_PORT );
+            new Thread(sender).start();
+            registerReceiver(sender, esm_filter);
+
+            Thread receiver = new Thread(new Receiver(this, socket, serverAddr, UDP_SERVER_PORT));
+            receiver.start();
+
+        } catch(Exception e){
+            Log.e("Client", "Error connecting", e);
+            e.printStackTrace();
+        }
 
     }
 
@@ -125,8 +138,8 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
             Log.d(TAG, "Vector sum: " + vector_sum);
             notifyUser();
 
-            client.setAcc(vector_sum);
-            client.setFall(true);
+            sender.setAcc(vector_sum);
+            sender.setFall(true);
 
         }
     }
@@ -155,7 +168,7 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
     public void onDestroy() {
         super.onDestroy();
 
-        unregisterReceiver(client);
+        unregisterReceiver(sender);
         Aware.setSetting(getApplicationContext(), Aware_Preferences.STATUS_ESM, false);
         if( DEBUG ) Log.d(TAG, "collapse_detector plugin terminated");
         mSensorManager.unregisterListener(this, mAccelerometer);
@@ -166,6 +179,8 @@ public class Plugin extends Aware_Plugin implements SensorEventListener {
 
         monitoring = false;
         run=false;
-        client.setRun(false);
+        sender.setRun(false);
+        receiver.setRun(false);
+
     }
 }

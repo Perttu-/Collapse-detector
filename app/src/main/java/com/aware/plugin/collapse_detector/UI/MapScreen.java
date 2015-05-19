@@ -93,7 +93,6 @@ public class MapScreen extends FragmentActivity {
             SimpleDateFormat sdf = new SimpleDateFormat("MM.dd.yyyy HH:mm ");
             String date = sdf.format(timestamp);
 
-            //this if statement is just a workaround to ignore encrypted data
 
 
         String collapseDecrypted = AES.decrypt(info);
@@ -117,8 +116,6 @@ public class MapScreen extends FragmentActivity {
             this.receivedString = receivedString;
         }
 
-
-
         InfoParser(String pString){
             this.receivedString=pString;
             Log.d("MAP SCREEN", "PARSING: "+receivedString);
@@ -129,6 +126,8 @@ public class MapScreen extends FragmentActivity {
         }
 
         LatLng getLatLng(){
+
+
             double receivedLatitude = Double.parseDouble(receivedString.split(" ")[1].replace("\"","").replace("[","").replace("]","").replace(",",""));
             double receivedLongitude = Double.parseDouble(receivedString.split(" ")[2].replace("\"","").replace("[","").replace("]","").replace(",",""));
             return new LatLng(receivedLatitude, receivedLongitude);
